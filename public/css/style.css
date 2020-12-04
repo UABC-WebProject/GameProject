@@ -210,3 +210,31 @@ p{
     margin: 20px 10;
     color: #000000;
 }
+
+
+/*
+##############################################
+#############  Register Section  #############
+##############################################
+*/
+
+#register{
+    padding: 7% 15% ;
+    position: relative;
+    background-color: #fff;
+    text-align: left;
+}
+.invalid-register-text{
+    color: red;
+    font-size: medium;
+}
+.register-text{
+    font-size: 1.5rem;
+}
+.icon{
+    padding-bottom: 1rem;
+    color: #ef8172;
+}
+.icon:hover{
+    color: #ff4c68;
+}

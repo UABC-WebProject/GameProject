@@ -1,11 +1,19 @@
+const React = require('react');
+const ReactDOM = require('react-dom');
+const ejs = require('ejs');
 const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
 const mongoose = require('mongoose');
 const url = 'mongodb://localhost:27017/gamespotDB';
 
+app.set('view engine', 'ejs');
+
 app.use(express.static("public"));
 app.use(bodyParser.urlencoded({extended:true}));
+
+/*If register fails messages*/
+let errorMessage; 
 
 /* connection to the MongoDB */ 
 mongoose.connect(url, {useNewUrlParser: true, useUnifiedTopology: true});
@@ -47,7 +55,8 @@ app.get("/login", (req, res)=>{
 });
 
 app.get("/register", (req, res)=>{
-    res.sendFile(__dirname+"/html/register.html");
+    errorMessage = "";
+    res.render(__dirname+"/views/register.ejs", {message:errorMessage})
 });
 
 app.get("/success", (req, res)=>{
@@ -64,16 +73,19 @@ app.post('/register', (req, res)=>{
     const lName = req.body.lastname;
     const user_password = req.body.password;
     const user_email = req.body.email;
-
     User.where({email: user_email}).findOne((err, getEmail)=>{
         if(err || getEmail != null){
-            console.log(err);
-            res.redirect('/failure');
+            console.log(req.body);
+            errorMessage = "*Email already exists"
+            res.render(__dirname+'/views/register.ejs', {message:errorMessage});
+            //res.redirect('/register');
+
         }else{
             User.find((err, userList)=>{
                 if(err){
                     res.redirect('/failure');
                 }else{
+                    /* register new user */
                     const user = new User({
                         _id: userList.length + 1,
                         name: fName,
