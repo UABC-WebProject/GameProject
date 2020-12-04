@@ -1,0 +1,212 @@
+body{
+    font-family: 'Montserrat', sans-serif;
+    text-align: center;
+}
+h1, h2, h3, h4, h5, h6{
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 900;
+}
+p{
+    color: #8f8f8f;
+    padding: 2% 0;
+    font-size: 12px;
+}
+
+.login-form{
+	width: 30%;
+}
+
+#map {
+  height: 100%;
+}
+/*
+################################################
+#############   Title Section    ###############
+################################################
+*/
+#title{
+    background-color: #FABC3C;
+    color: #CA5310;
+}
+.title-image{
+    width: 60%;
+    transform: rotate(25deg);
+    position: absolute;
+    right: 30%;
+}
+@media (max-width: 991px){
+    #title{
+        text-align: center;
+
+    }
+    .title-image{
+        transform: rotate(0deg);
+        position: static;
+    }
+}
+.big-heading{
+    font-size: 3.5rem;
+    line-height: 1.5;
+}
+.container-fluid{
+    padding: 3% 15% 11%;
+}
+
+/*
+##################################################
+############  Navigation Bar Section  ############
+##################################################
+*/
+.navbar{
+    padding: 0 0 4.5rem;
+}
+
+.navbar-brand{
+    font-family: 'Ubuntu', sans-serif;
+    font-size: 2.1rem;
+    font-weight: bold;
+}
+
+.nav-item{
+    padding: 0px 18px;
+}
+
+.nav-link{
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 400;
+    font-size: 1.2rem;
+}
+
+/*Downloads Buttons*/
+.download-button{
+    margin: 5% 3% 5% 0;
+}
+
+
+
+/*
+##############################################
+#############  Videogame Section  #############
+##############################################
+*/
+#videogame-section{
+    padding: 7% 15% ;
+    position: relative;
+    background-color: #fff;
+}
+
+#videogame-section .card{
+	padding: 0;
+	margin: 0 auto;
+}
+.videogame-card{
+	padding: .5rem;
+}
+/*
+##############################################
+#############  Features Section  #############
+##############################################
+*/
+
+#features{
+    padding: 7% 15% ;
+    position: relative;
+    background-color: #fff;
+}
+.feature-text{
+    font-size: 1.5rem;
+}
+.feature-box{
+}
+.icon{
+    padding-bottom: 1rem;
+    color: #ef8172;
+}
+.icon:hover{
+    color: #ff4c68;
+}
+
+/*
+##############################################
+###########  Testimonials Section  ########### 
+##############################################
+*/
+
+#testimonials{
+    background-color: #FABC3C;
+    color: white;
+}
+.carousel-item{
+    padding: 7% 15%;
+}
+
+.testimonials-text{
+    font-size: 4rem;
+    line-height: 1.5;
+}
+
+.testimonials-image{
+    margin: 20px;
+    width: 45%;
+}
+
+/*
+#############################################
+##############  Press Section  ##############
+############################################# 
+*/
+#press{
+    background-color: #ffffff;
+    padding-right: 3%;
+}
+
+.press-logo{
+    width: 15%;
+    margin:20px 20px 50px;
+}
+
+/*
+####################################################
+################  Pricing Section  ################# 
+####################################################
+*/
+#pricing{
+    padding: 100px;
+    background-color:#FABC3C;
+}
+.price-text{
+    font-size: 3rem;
+    line-height: 1.5;
+}
+
+.pricing-plan-text{
+    font-size: 1.5rem;
+
+}
+
+.pricing-column{
+	background-color: #FABC3C;
+    padding: 3% 2%;
+}
+
+
+/*
+################################################## 
+############  Call To Action Section  ############
+##################################################
+*/
+#cta{
+    padding: 7% 30%;
+    background-color: #fff;
+    color: #000;
+}
+
+#footer{
+    padding: 7% 15%;
+    background-color: #FABC3C;
+}
+
+.footer-icon{
+    margin: 20px 10;
+    color: #000000;
+}
