@@ -51,7 +51,7 @@ app.get("/pc", (req, res)=>{
 });
 
 app.get("/login", (req, res)=>{
-    res.sendFile(__dirname+"/html/login.html");
+    res.render(__dirname+"/views/login.ejs", {message:" "});
 });
 
 app.get("/register", (req, res)=>{
@@ -67,6 +67,9 @@ app.get("/failure", (req, res)=>{
     res.sendFile(__dirname+"/html/failure.html");
 });
 
+app.get("/uploadVideogame", (req, res)=>{
+    res.sendFile(__dirname+"/html/uploadVideogame.html");
+});
 
 app.post('/register', (req, res)=>{
     const fName = req.body.name;
@@ -75,11 +78,8 @@ app.post('/register', (req, res)=>{
     const user_email = req.body.email;
     User.where({email: user_email}).findOne((err, getEmail)=>{
         if(err || getEmail != null){
-            console.log(req.body);
             errorMessage = "*Email already exists"
             res.render(__dirname+'/views/register.ejs', {message:errorMessage});
-            //res.redirect('/register');
-
         }else{
             User.find((err, userList)=>{
                 if(err){
@@ -105,6 +105,7 @@ app.post('/register', (req, res)=>{
 app.post('/login', (req, res)=>{
     const user_email = req.body.email;
     const user_password = req.body.password;
+    let error_message; 
 
     User.where(user_email).findOne((err, users)=>{
         if(err){
@@ -115,7 +116,9 @@ app.post('/login', (req, res)=>{
                 res.redirect('/');
             }else{
                 console.log("WRONG");
-                res.redirect('/login');
+                error_message = "Check your password."
+                res.render(__dirname+'/views/login.ejs', {message:error_message});
+                //res.redirect('/login');
             }
         }
     })

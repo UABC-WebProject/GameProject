@@ -116,8 +116,7 @@ p{
 .feature-text{
     font-size: 1.5rem;
 }
-.feature-box{
-}
+
 .icon{
     padding-bottom: 1rem;
     color: #ef8172;
@@ -237,4 +236,20 @@ p{
 }
 .icon:hover{
     color: #ff4c68;
+}
+
+/*
+##############################################
+#############  Register Section  #############
+##############################################
+*/
+#upload-game{
+    padding: 7% 15% ;
+    position: relative;
+    background-color: #fff;
+    text-align: left;
+}
+
+#game-title-input{
+    color: black;
 }
