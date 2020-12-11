@@ -21,10 +21,10 @@ const storage = multer.diskStorage({
 
 var upload = multer({storage:storage});
 /* setting-up password encryption method */
-const bcrypt = require('bcrypt');
+/* const bcrypt = require('bcrypt');
 const { rejects } = require('assert');
 const { useLayoutEffect } = require('react');
-const saltRounds = 10;
+const saltRounds = 10; */
 
 app.set('view engine', 'ejs');
 
@@ -37,6 +37,7 @@ let errorMessage;
 /* connection to the MongoDB */ 
 mongoose.connect(url, {useNewUrlParser: true, useUnifiedTopology: true});
 
+/*DB collections */
 const userSchema = new mongoose.Schema({
     _id: Number,
     name: String,
@@ -45,19 +46,39 @@ const userSchema = new mongoose.Schema({
     password: String,
     admin: Boolean
 });
-const User = mongoose.model("User", userSchema);
+const storeSchema = new mongoose.Schema({
+    storeName: String,
+    storeUrl: String
+});
+const Store = mongoose.model("Store", storeSchema);
+
+const consoleSchema = mongoose.Schema({
+    _id: Number,
+    consoleName: String
+});
+const Console = mongoose.model("Console", consoleSchema);
 
 const videogameSchema = new mongoose.Schema({
-    _id: String,
+    _id: Number,
     title: String,
     description: String,
     path: String,
-    console: [String],
     genre: String,
     rate: String,
-    score: Number
+    score: Number,
+    store: Array,
+    console: [Number]
 });
+
+
+
+/* Get a reference of the Schemas created above */
+const User = mongoose.model("User", userSchema);
 const Videogame = mongoose.model("Videogame", videogameSchema);
+
+
+
+
 
 /* Get methods to access different html files */
 app.get("/", (req, res)=>{
@@ -65,19 +86,39 @@ app.get("/", (req, res)=>{
 });
 
 app.get("/xbox", (req, res)=>{
-    res.sendFile(__dirname+"/html/xbox.html");
+    Videogame.where({console: 2}).find((err, gameList) =>{
+        if(!err){ 
+            console.log("XBOX" + gameList);
+            res.render(__dirname+"/views/xbox.ejs", {videogameList: gameList});
+        }
+    });
 });
 
 app.get("/ps4", (req, res)=>{
-    res.render(__dirname+"/views/playstation.ejs");
+    Videogame.where({console: 1}).find((err, gameList) =>{
+        if(!err){ 
+            console.log("PS4" + gameList);
+            res.render(__dirname+"/views/playstation.ejs", {videogameList: gameList});
+        }
+    });
 });
 
 app.get("/switch", (req, res)=>{
-    res.sendFile(__dirname+"/html/switch.html");
+    Videogame.where({console: 3}).find((err, gameList) =>{
+        if(!err){ 
+            console.log("SWITCH" + gameList);
+            res.render(__dirname+"/views/switch.ejs", {videogameList: gameList});
+        }
+    });
 });
 
 app.get("/pc", (req, res)=>{
-    res.sendFile(__dirname+"/html/pc.html");
+    Videogame.where({console: 4}).find((err, gameList) =>{
+        if(!err){ 
+            console.log(gameList);
+            res.render(__dirname+"/views/pc.ejs", {videogameList: gameList});
+        }
+    });
 });
 
 app.get("/login", (req, res)=>{
@@ -158,43 +199,54 @@ app.post('/login', (req, res)=>{
     })
 });
 
-app.post('/uploadVideogame',upload.single('gameImage'), (req, res, next) =>{
-    var imageRoute = '../images/' + req.file.filename;
+app.post('/uploadVideogame',upload.single('gameImage'), (req, res) =>{
     var imageAlt = `Image ${req.file.filename} isn't available`;
+    var imageRoute = '../images/' + req.file.filename;
     var consoleAvailability = [];
     var gameScore = Number(req.body.gameScore);
     var gameRate = req.body.gameRating;
     var gameGenre = req.body.gameGenre;
 
+    /* Adds the console availability */
     if(req.body.ps4 != undefined)
-        consoleAvailability.push(req.body.ps4);
+        consoleAvailability.push(Number(req.body.ps4));
     if(req.body.xbox != undefined)
-        consoleAvailability.push(req.body.xbox);
+        consoleAvailability.push(Number(req.body.xbox));
     if(req.body.switch != undefined)
-        consoleAvailability.push(req.body.switch);
+        consoleAvailability.push(Number(req.body.switch));
     if(req.body.pc != undefined)
-        consoleAvailability.push(req.body.pc);
-    console.log(consoleAvailability);
+        consoleAvailability.push(Number(req.body.pc));
 
-    /* Preparing the image data to upload the info to the DB */
-    const videogame = new Videogame({
-        _id: mongoose.mongo.ObjectId(),
-        title: req.body.gameTitle,
-        description:req.body.gameDescription,
-        path: imageRoute,
-        score: gameScore,
-        genre: gameGenre,
-        rate: gameRate,
-        console: consoleAvailability
+    const store = new Store({
+        storeName: req.body.gameStore,
+        storeUrl: req.body.gameStoreUrl 
     });
+    Videogame.find( (err, gameList) => {
+        if(!err){
+            const videogame = new Videogame({
+                _id: gameList.length + 1,
+                title: req.body.gameTitle,
+                description:req.body.gameDescription,
+                path: imageRoute,
+                score: gameScore,
+                genre: gameGenre,
+                rate: gameRate,
+                console: consoleAvailability,
+                store: store
+            });
+            /* Saving the videogame in the DB */
+            videogame.save();
 
-    /* Saving the videogame in the DB */
-    videogame.save();
-
-    /* Redirecting to the updated page */
-    res.render(__dirname+"/views/uploadVideogame.ejs", {
-        previewImage:  imageRoute,
-        imageAlt: imageAlt, status: true
+            /* Redirecting to the updated page */
+            res.render(__dirname+"/views/uploadVideogame.ejs", {
+                previewImage:  imageRoute,
+                imageAlt: imageAlt, 
+                status: true,
+                score: gameScore,
+                rate: gameRate,
+                genre: gameGenre
+            });
+        }
     });
 });
 

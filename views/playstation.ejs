@@ -59,13 +59,18 @@
       </div>
   </section>
   <section id="ps4-list-game">
-    <div class="card" style="width: 18rem;">
-      <img src="" class="card-img-top" alt="...">
-      <div class="card-body">
-        <h5 class="card-title">Card title</h5>
-        <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-        <a href="#" class="btn btn-primary">Go somewhere</a>
+    <div class="row">
+      <% for( let index = 0; index < videogameList.length; index++ ) { %>
+      <div class="col-lg-3 col-md-4 col-sm-12">
+        <div class="card videogame-card" >
+          <img src= <%= videogameList[index].path %>  class = "card-img-top" alt="...">
+          <div class="card-body">
+            <h5 class="card-title"><%= videogameList[index].title %> </h5>
+            <a href="#" class="btn btn-primary">More Info</a>
+          </div> 
+        </div>
       </div>
+      <% } %>
     </div>
   </section>
     
