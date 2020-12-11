@@ -1,3 +1,5 @@
+const path = require('path');
+const multer = require('multer');
 const React = require('react');
 const ReactDOM = require('react-dom');
 const ejs = require('ejs');
@@ -6,6 +8,23 @@ const app = express();
 const bodyParser = require("body-parser");
 const mongoose = require('mongoose');
 const url = 'mongodb://localhost:27017/gamespotDB';
+
+/* configure how the image gonna be store */
+const storage = multer.diskStorage({
+    destination: function(req, file, cb){
+        cb(null, 'public/images/');
+    },
+    filename: function(req, file, cb){
+        cb(null, file.originalname)
+    }
+});
+
+var upload = multer({storage:storage});
+/* setting-up password encryption method */
+const bcrypt = require('bcrypt');
+const { rejects } = require('assert');
+const { useLayoutEffect } = require('react');
+const saltRounds = 10;
 
 app.set('view engine', 'ejs');
 
@@ -27,7 +46,14 @@ const userSchema = new mongoose.Schema({
     admin: Boolean
 });
 
-const User = mongoose.model("User", userSchema);
+const videogameSchema = new mongoose.Schema({
+    _id: String,
+    title: String,
+    description: String,
+    path: String,
+    console: [String]
+});
+const Videogame = mongoose.model("Videogame", videogameSchema);
 
 /* Get methods to access different html files */
 app.get("/", (req, res)=>{
@@ -39,7 +65,9 @@ app.get("/xbox", (req, res)=>{
 });
 
 app.get("/ps4", (req, res)=>{
-    res.sendFile(__dirname+"/html/playstation.html");
+
+    res.render(__dirname+"/views/playstation.ejs");
+    //res.sendFile(__dirname+"/html/playstation.html");
 });
 
 app.get("/switch", (req, res)=>{
@@ -68,7 +96,7 @@ app.get("/failure", (req, res)=>{
 });
 
 app.get("/uploadVideogame", (req, res)=>{
-    res.sendFile(__dirname+"/html/uploadVideogame.html");
+    res.render(__dirname+"/views/uploadVideogame.ejs", {previewImage: " ", status: false});
 });
 
 app.post('/register', (req, res)=>{
@@ -118,10 +146,26 @@ app.post('/login', (req, res)=>{
                 console.log("WRONG");
                 error_message = "Check your password."
                 res.render(__dirname+'/views/login.ejs', {message:error_message});
-                //res.redirect('/login');
             }
         }
     })
+});
+
+app.post('/uploadVideogame',upload.single('gameImage'), (req, res, next) =>{
+    var imageRoute = '../images/' + req.file.filename;
+    var imageAlt = `Image ${req.file.filename} isn't available`;
+    console.log(req.body.gameTitle);
+    console.log(req.body.gameDescription);
+    console.log(imageRoute);
+    const videogame = new Videogame({
+        _id: mongoose.mongo.ObjectId(),
+        title: req.body.gameTitle,
+        description:req.body.gameDescription,
+        path: imageRoute
+    });
+    videogame.save();
+    res.render(__dirname+"/views/uploadVideogame.ejs", {previewImage:  imageRoute,
+        imageAlt: imageAlt, status: true});
 });
 
 //App listen on port 3000

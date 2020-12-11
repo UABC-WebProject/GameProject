@@ -253,3 +253,16 @@ p{
 #game-title-input{
     color: black;
 }
+
+.game-image-upload{
+    padding-top: .5rem;
+    width: 20%;
+}
+
+
+#ps4-list-game{
+    padding: 7% 15% ;
+    position: relative;
+    background-color: #fff;
+    text-align: left;
+}
