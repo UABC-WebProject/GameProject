@@ -45,6 +45,7 @@ const userSchema = new mongoose.Schema({
     password: String,
     admin: Boolean
 });
+const User = mongoose.model("User", userSchema);
 
 const videogameSchema = new mongoose.Schema({
     _id: String,
@@ -65,9 +66,7 @@ app.get("/xbox", (req, res)=>{
 });
 
 app.get("/ps4", (req, res)=>{
-
     res.render(__dirname+"/views/playstation.ejs");
-    //res.sendFile(__dirname+"/html/playstation.html");
 });
 
 app.get("/switch", (req, res)=>{
@@ -104,7 +103,10 @@ app.post('/register', (req, res)=>{
     const lName = req.body.lastname;
     const user_password = req.body.password;
     const user_email = req.body.email;
+
+    /* Querying to validate if that the email we want to store doesn't duplicate */
     User.where({email: user_email}).findOne((err, getEmail)=>{
+        /* If email already exists */
         if(err || getEmail != null){
             errorMessage = "*Email already exists"
             res.render(__dirname+'/views/register.ejs', {message:errorMessage});
@@ -122,7 +124,7 @@ app.post('/register', (req, res)=>{
                         password: user_password,
                         admin: false
                     });
-                    user.save();
+                    user.save(); //Save new user
                     res.redirect('/success');
                 }
             });
@@ -135,10 +137,12 @@ app.post('/login', (req, res)=>{
     const user_password = req.body.password;
     let error_message; 
 
+    /* Querying to fetched data */ 
     User.where(user_email).findOne((err, users)=>{
         if(err){
             console.log(err);
         }else{
+            /* Validate credentials to check the data match */
             if(users.password === user_password){
                 console.log("SUCCESS");
                 res.redirect('/');
@@ -154,18 +158,23 @@ app.post('/login', (req, res)=>{
 app.post('/uploadVideogame',upload.single('gameImage'), (req, res, next) =>{
     var imageRoute = '../images/' + req.file.filename;
     var imageAlt = `Image ${req.file.filename} isn't available`;
-    console.log(req.body.gameTitle);
-    console.log(req.body.gameDescription);
-    console.log(imageRoute);
+
+    /* Preparing the image data to upload the info to the DB */
     const videogame = new Videogame({
         _id: mongoose.mongo.ObjectId(),
         title: req.body.gameTitle,
         description:req.body.gameDescription,
         path: imageRoute
     });
+
+    /* Saving the videogame in the DB */
     videogame.save();
-    res.render(__dirname+"/views/uploadVideogame.ejs", {previewImage:  imageRoute,
-        imageAlt: imageAlt, status: true});
+
+    /* Redirecting to the updated page */
+    res.render(__dirname+"/views/uploadVideogame.ejs", {
+        previewImage:  imageRoute,
+        imageAlt: imageAlt, status: true
+    });
 });
 
 //App listen on port 3000
