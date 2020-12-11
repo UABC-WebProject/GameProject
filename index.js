@@ -52,7 +52,10 @@ const videogameSchema = new mongoose.Schema({
     title: String,
     description: String,
     path: String,
-    console: [String]
+    console: [String],
+    genre: String,
+    rate: String,
+    score: Number
 });
 const Videogame = mongoose.model("Videogame", videogameSchema);
 
@@ -158,13 +161,31 @@ app.post('/login', (req, res)=>{
 app.post('/uploadVideogame',upload.single('gameImage'), (req, res, next) =>{
     var imageRoute = '../images/' + req.file.filename;
     var imageAlt = `Image ${req.file.filename} isn't available`;
+    var consoleAvailability = [];
+    var gameScore = Number(req.body.gameScore);
+    var gameRate = req.body.gameRating;
+    var gameGenre = req.body.gameGenre;
+
+    if(req.body.ps4 != undefined)
+        consoleAvailability.push(req.body.ps4);
+    if(req.body.xbox != undefined)
+        consoleAvailability.push(req.body.xbox);
+    if(req.body.switch != undefined)
+        consoleAvailability.push(req.body.switch);
+    if(req.body.pc != undefined)
+        consoleAvailability.push(req.body.pc);
+    console.log(consoleAvailability);
 
     /* Preparing the image data to upload the info to the DB */
     const videogame = new Videogame({
         _id: mongoose.mongo.ObjectId(),
         title: req.body.gameTitle,
         description:req.body.gameDescription,
-        path: imageRoute
+        path: imageRoute,
+        score: gameScore,
+        genre: gameGenre,
+        rate: gameRate,
+        console: consoleAvailability
     });
 
     /* Saving the videogame in the DB */
