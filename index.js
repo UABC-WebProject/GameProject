@@ -142,6 +142,11 @@ app.get("/uploadVideogame", (req, res)=>{
     res.render(__dirname+"/views/uploadVideogame.ejs", {previewImage: " ", status: false});
 });
 
+app.get("/gameInfo", (req, res) =>{
+    res.render(__dirname+"/views/gameInfo.ejs");
+});
+
+/* POST methods */ 
 app.post('/register', (req, res)=>{
     const fName = req.body.name;
     const lName = req.body.lastname;
