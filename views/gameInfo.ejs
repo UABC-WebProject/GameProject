@@ -1,2 +1,15 @@
 <%- include('header'); %>
+<div class="ps4-list-game">
+   
+    <div class="row">
+        <div class="col-lg-6 col-md-6 col-sm-6">
+            <img class="game-info-img" src=<%= selectedGame.path %>  alt=":)">
+        </div>
+        <div class="col-lg-6 col-md-6 col-sm-6">
+            <h4> <%= selectedGame.title %>  </h4>
+            <h4> <%= selectedGame.description %> </h4>
+        </div>
+    </div>
+</div>
+
 <%- include('footer'); %>

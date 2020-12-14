@@ -267,3 +267,22 @@ p{
     background-color: #fff;
     text-align: left;
 }
+
+.game-anchor{
+    color: #000;
+    text-decoration: none;
+}
+.game-anchor:hover{
+    color: #000;
+    text-decoration: none;
+}
+
+.ps4-list-game{
+    padding: 3rem;
+}
+
+.game-info-img{
+    max-width: 50%;
+    height: auto;
+
+}

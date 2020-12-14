@@ -7,6 +7,7 @@ const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
 const mongoose = require('mongoose');
+const { createSecretKey } = require('crypto');
 const url = 'mongodb://localhost:27017/gamespotDB';
 
 /* configure how the image gonna be store */
@@ -87,8 +88,7 @@ app.get("/", (req, res)=>{
 
 app.get("/xbox", (req, res)=>{
     Videogame.where({console: 2}).find((err, gameList) =>{
-        if(!err){ 
-            console.log("XBOX" + gameList);
+        if(!err){
             res.render(__dirname+"/views/xbox.ejs", {videogameList: gameList});
         }
     });
@@ -96,8 +96,7 @@ app.get("/xbox", (req, res)=>{
 
 app.get("/ps4", (req, res)=>{
     Videogame.where({console: 1}).find((err, gameList) =>{
-        if(!err){ 
-            console.log("PS4" + gameList);
+        if(!err){
             res.render(__dirname+"/views/playstation.ejs", {videogameList: gameList});
         }
     });
@@ -105,8 +104,7 @@ app.get("/ps4", (req, res)=>{
 
 app.get("/switch", (req, res)=>{
     Videogame.where({console: 3}).find((err, gameList) =>{
-        if(!err){ 
-            console.log("SWITCH" + gameList);
+        if(!err){
             res.render(__dirname+"/views/switch.ejs", {videogameList: gameList});
         }
     });
@@ -114,8 +112,7 @@ app.get("/switch", (req, res)=>{
 
 app.get("/pc", (req, res)=>{
     Videogame.where({console: 4}).find((err, gameList) =>{
-        if(!err){ 
-            console.log(gameList);
+        if(!err){
             res.render(__dirname+"/views/pc.ejs", {videogameList: gameList});
         }
     });
@@ -255,6 +252,16 @@ app.post('/uploadVideogame',upload.single('gameImage'), (req, res) =>{
     });
 });
 
+app.post('/gameInfo', (req, res) => {
+    console.log(req.body.gameId);
+    console.log('#########################################');
+    Videogame.where({_id : req.body.gameId}).findOne((err, selectedGame) =>{
+        if(!err){
+            console.log(selectedGame);
+            res.render(__dirname+"/views/gameInfo.ejs", {selectedGame: selectedGame});
+        }
+    });
+});
 //App listen on port 3000
 app.listen(3000, ()=>{
     console.log("Server started on port 3000");
