@@ -7,7 +7,9 @@
           <img src= <%= videogameList[index].path %>  class = "card-img-top" alt="...">
           <div class="card-body">
             <h5 class="card-title"><%= videogameList[index].title %> </h5>
-            <a href="#" class="btn btn-primary">More Info</a>
+            <form action="/gameInfo" method="post">
+              <button name="gameId" value = <%= videogameList[index]._id %> class="btn btn-primary" type="submit">More Info</button>
+            </form>
           </div> 
         </div>
       </div>
