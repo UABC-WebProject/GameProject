@@ -1,13 +1,11 @@
-const path = require('path');
+require('dotenv').config();
 const multer = require('multer');
-const React = require('react');
-const ReactDOM = require('react-dom');
 const ejs = require('ejs');
 const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
 const mongoose = require('mongoose');
-const { createSecretKey } = require('crypto');
+const encrypt = require("mongoose-encryption");
 const url = 'mongodb://localhost:27017/gamespotDB';
 
 /* configure how the image gonna be store */
@@ -40,13 +38,15 @@ mongoose.connect(url, {useNewUrlParser: true, useUnifiedTopology: true});
 
 /*DB collections */
 const userSchema = new mongoose.Schema({
-    _id: Number,
     name: String,
     lastName: String,
     email: String,
     password: String,
     admin: Boolean
 });
+
+userSchema.plugin(encrypt, { secret: process.env.SECRET, encryptedFields: ["password"] });
+
 const storeSchema = new mongoose.Schema({
     storeName: String,
     storeUrl: String
@@ -71,14 +71,9 @@ const videogameSchema = new mongoose.Schema({
     console: [Number]
 });
 
-
-
 /* Get a reference of the Schemas created above */
 const User = mongoose.model("User", userSchema);
 const Videogame = mongoose.model("Videogame", videogameSchema);
-
-
-
 
 
 /* Get methods to access different html files */
@@ -151,54 +146,49 @@ app.post('/register', (req, res)=>{
     const user_email = req.body.email;
 
     /* Querying to validate if that the email we want to store doesn't duplicate */
-    User.where({email: user_email}).findOne((err, getEmail)=>{
+    User.findOne({email: user_email}, (err, getEmail)=>{
         /* If email already exists */
         if(err || getEmail != null){
             errorMessage = "*Email already exists"
             res.render(__dirname+'/views/register.ejs', {message:errorMessage});
         }else{
-            User.find((err, userList)=>{
-                if(err){
-                    res.redirect('/failure');
-                }else{
-                    /* register new user */
-                    const user = new User({
-                        _id: userList.length + 1,
-                        name: fName,
-                        lastName: lName,
-                        email:user_email,
-                        password: user_password,
-                        admin: false
-                    });
-                    user.save(); //Save new user
-                    res.redirect('/success');
-                }
+            /* register new user */
+            const user = new User({
+                name: fName,
+                lastName: lName,
+                email:user_email,
+                password: user_password,
+                admin: false
             });
+            user.save(); //Save new user
+            res.redirect('/success');
         }
     });
 });
 
 app.post('/login', (req, res)=>{
+    /* Getting the user and password from the form */
     const user_email = req.body.email;
     const user_password = req.body.password;
-    let error_message; 
 
     /* Querying to fetched data */ 
-    User.where(user_email).findOne((err, users)=>{
+    User.findOne( {email: user_email}, (err, foundUser)=>{
         if(err){
             console.log(err);
         }else{
             /* Validate credentials to check the data match */
-            if(users.password === user_password){
-                console.log("SUCCESS");
-                res.redirect('/');
-            }else{
-                console.log("WRONG");
-                error_message = "Check your password."
-                res.render(__dirname+'/views/login.ejs', {message:error_message});
+            if(foundUser){
+                if( foundUser.password === user_password){
+                    console.log("SUCCESS");
+                    res.redirect('/');
+                }else{
+                    console.log("WRONG");
+                    let error_message = "Check your password."
+                    res.render(__dirname+'/views/login.ejs', {message:error_message});
+                }
             }
         }
-    })
+    });
 });
 
 app.post('/uploadVideogame',upload.single('gameImage'), (req, res) =>{
