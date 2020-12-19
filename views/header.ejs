@@ -50,7 +50,7 @@
                 </a>
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
                   <% if (authenticated === true) { %>
-                    <h6 class="dropdown-header">Hello, <%= userLogged.admin %> </h6>
+                    <h6 class="dropdown-header">Hello, <%= userLogged.name %> </h6>
                   <% } %>
                   <% if( authenticated === false){ %>
                     <a class="dropdown-item" href="/login"> <h6>Login</h6></a>

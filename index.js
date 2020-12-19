@@ -191,7 +191,11 @@ app.get("/uploadVideogame", (req, res)=>{
 });
 
 app.get("/gameInfo", (req, res) =>{
-    res.render(__dirname+"/views/gameInfo.ejs");
+    if(req.isAuthenticated()){
+        res.render(__dirname+"/views/gameInfo.ejs", {authenticated: true, userLogged: currentUser});
+    }else{
+        res.render(__dirname+"/views/gameInfo.ejs", {authenticated: false});
+    }
 });
 
 app.get('/settings', (req, res)=>{
