@@ -1,5 +1,24 @@
 <%- include('header'); %>
 <section id="user-settings">
-
+    <h1>General Information </h1>
+    <form>
+        <div class="form-row">
+            <div class="form-group col-md-4">
+                <label for="name">Name</label>
+                <input type="text" class="form-control" id="name" value= <%= userLogged.name%> disabled>
+            </div>
+            <div class="form-group col-md-4">
+                <label for="lastname">Lastname</label>
+                <input type="text" class="form-control" id="lastname" value= <%= userLogged.lastName%> disabled>
+            </div>
+            <div class="form-group col-md-8">
+                <label for="username">Email</label>
+                <input type="text" class="form-control" id="username" value= <%= userLogged.username%> disabled>
+            </div>
+            
+        </div>
+        <a href="#" type="submit" class="btn btn-info">Update my info</a>
+        <a href="#" type="submit" class="btn btn-danger">Delete account</a>
+    </form>
 </section>
 <%- include('footer'); %>

@@ -11,7 +11,7 @@ const session = require('express-session');
 const passport = require("passport");
 const passportLocalMongoose = require('passport-local-mongoose');
 //const passportLocal = require('passport-local');
-
+var currentUser;
 /*If register fails messages*/
 let errorMessage; 
 
@@ -106,8 +106,6 @@ const Videogame = mongoose.model("Videogame", videogameSchema);
 
 /* Get methods to access different html files */
 app.get("/", (req, res)=>{
-    console.log("INDEX FILE");
-    console.log(req.user);
     if(req.isAuthenticated()){
         res.render(__dirname+"/index.ejs", {userLogged: req.user, authenticated:true});
     }else{
@@ -185,10 +183,8 @@ app.get("/failure", (req, res)=>{
 });
 
 app.get("/uploadVideogame", (req, res)=>{
-    if(req.isAuthenticated){
-        console.log('*******************************');
-        console.log(req.user);
-        res.render(__dirname+"/views/uploadVideogame.ejs", {previewImage: " ", status: false});
+    if(req.isAuthenticated() && (currentUser.admin === true)){
+        res.render(__dirname+"/views/uploadVideogame.ejs", {previewImage: " ", userLogged:req.user , authenticated: true ,status: false});
     }else{
         res.redirect('/');
     }
@@ -219,7 +215,6 @@ app.post('/register', (req, res)=>{
             res.render(__dirname+"/views/register.ejs", {message: err});
         }else{
             passport.authenticate('local')(req, res, function(){
-                console.log(user);
                 user.save();
                 res.redirect('/');
             });
@@ -239,7 +234,7 @@ app.post('/login', (req, res)=>{
                     res.render(__dirname+"/views/login.ejs", {errorMessage: error});  
                 }else{
                     passport.authenticate('local')(req, res, ()=>{
-                        console.log(req.user);
+                        currentUser = req.user;
                         res.redirect('/');
                     });
                 }
@@ -249,6 +244,7 @@ app.post('/login', (req, res)=>{
 });
 
 app.post('/uploadVideogame',upload.single('gameImage'), (req, res) =>{
+    console.log(req.user);
     var imageAlt = `Image ${req.file.filename} isn't available`;
     var imageRoute = '../images/' + req.file.filename;
     var consoleAvailability = [];
@@ -293,7 +289,9 @@ app.post('/uploadVideogame',upload.single('gameImage'), (req, res) =>{
                 status: true,
                 score: gameScore,
                 rate: gameRate,
-                genre: gameGenre
+                genre: gameGenre,
+                authenticated: true,
+                userLogged: currentUser
             });
         }
     });
@@ -305,10 +303,11 @@ app.post('/gameInfo', (req, res) => {
     Videogame.where({_id : req.body.gameId}).findOne((err, selectedGame) =>{
         if(!err){
             console.log(selectedGame);
-            res.render(__dirname+"/views/gameInfo.ejs", {selectedGame: selectedGame});
+            res.render(__dirname+"/views/gameInfo.ejs", {selectedGame: selectedGame, userLogged: currentUser, authenticated: true});
         }
     });
 });
+
 //App listen on port 3000
 app.listen(3000, ()=>{
     console.log("Server started on port 3000");
