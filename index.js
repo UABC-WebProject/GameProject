@@ -1,11 +1,34 @@
 require('dotenv').config();
+
+/* All dependecies required */
 const multer = require('multer');
 const ejs = require('ejs');
 const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
 const mongoose = require('mongoose');
-const encrypt = require("mongoose-encryption");
+const session = require('express-session');
+const passport = require("passport");
+const passportLocalMongoose = require('passport-local-mongoose');
+//const passportLocal = require('passport-local');
+
+/*If register fails messages*/
+let errorMessage; 
+
+var options = {
+    errorMessages: {
+        MissingPasswordError: 'No password was given',
+        AttemptTooSoonError: 'Account is currently locked. Try again later',
+        TooManyAttemptsError: 'Account locked due to too many failed login attempts',
+        NoSaltValueStoredError: 'Authentication not possible. No salt value stored',
+        IncorrectPasswordError: 'Password or username are incorrect',
+        IncorrectUsernameError: 'Password or username are incorrect',
+        MissingUsernameError: 'No username was given',
+        UserExistsError: 'A user with the given username is already registered'
+    }
+};
+
+/*DB URL */
 const url = 'mongodb://localhost:27017/gamespotDB';
 
 /* configure how the image gonna be store */
@@ -19,22 +42,24 @@ const storage = multer.diskStorage({
 });
 
 var upload = multer({storage:storage});
-/* setting-up password encryption method */
-/* const bcrypt = require('bcrypt');
-const { rejects } = require('assert');
-const { useLayoutEffect } = require('react');
-const saltRounds = 10; */
 
 app.set('view engine', 'ejs');
-
 app.use(express.static("public"));
 app.use(bodyParser.urlencoded({extended:true}));
 
-/*If register fails messages*/
-let errorMessage; 
+app.use(session({
+    secret: "Our little secret.",
+    resave: false,
+    saveUninitialized: false
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
+
 
 /* connection to the MongoDB */ 
 mongoose.connect(url, {useNewUrlParser: true, useUnifiedTopology: true});
+mongoose.set("useCreateIndex", true);
 
 /*DB collections */
 const userSchema = new mongoose.Schema({
@@ -44,8 +69,15 @@ const userSchema = new mongoose.Schema({
     password: String,
     admin: Boolean
 });
+userSchema.plugin(passportLocalMongoose);
 
-userSchema.plugin(encrypt, { secret: process.env.SECRET, encryptedFields: ["password"] });
+/* Get a reference of the Schemas created above */
+const User = new mongoose.model("User", userSchema);
+
+passport.use(User.createStrategy());
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser()); 
+
 
 const storeSchema = new mongoose.Schema({
     storeName: String,
@@ -70,15 +102,17 @@ const videogameSchema = new mongoose.Schema({
     store: Array,
     console: [Number]
 });
-
-/* Get a reference of the Schemas created above */
-const User = mongoose.model("User", userSchema);
 const Videogame = mongoose.model("Videogame", videogameSchema);
-
 
 /* Get methods to access different html files */
 app.get("/", (req, res)=>{
-    res.sendFile(__dirname+"/index.html"  );
+    console.log("INDEX FILE");
+    console.log(req.user);
+    if(req.isAuthenticated()){
+        res.render(__dirname+"/index.ejs", {userLogged: req.user, authenticated:true});
+    }else{
+        res.render(__dirname+"/index.ejs", {authenticated:false});
+    }
 });
 
 app.get("/xbox", (req, res)=>{
@@ -114,7 +148,7 @@ app.get("/pc", (req, res)=>{
 });
 
 app.get("/login", (req, res)=>{
-    res.render(__dirname+"/views/login.ejs", {message:" "});
+    res.render(__dirname+"/views/login.ejs", {errorMessage:" "});
 });
 
 app.get("/register", (req, res)=>{
@@ -131,62 +165,57 @@ app.get("/failure", (req, res)=>{
 });
 
 app.get("/uploadVideogame", (req, res)=>{
-    res.render(__dirname+"/views/uploadVideogame.ejs", {previewImage: " ", status: false});
+    if(req.isAuthenticated){
+        console.log('*******************************');
+        console.log(req.user);
+        res.render(__dirname+"/views/uploadVideogame.ejs", {previewImage: " ", status: false});
+    }else{
+        res.redirect('/');
+    }
 });
 
 app.get("/gameInfo", (req, res) =>{
     res.render(__dirname+"/views/gameInfo.ejs");
 });
 
-/* POST methods */ 
-app.post('/register', (req, res)=>{
-    const fName = req.body.name;
-    const lName = req.body.lastname;
-    const user_password = req.body.password;
-    const user_email = req.body.email;
+app.get('/logout', (req, res)=>{
+    req.logout();
+    res.redirect('/');
+});
 
-    /* Querying to validate if that the email we want to store doesn't duplicate */
-    User.findOne({email: user_email}, (err, getEmail)=>{
-        /* If email already exists */
-        if(err || getEmail != null){
-            errorMessage = "*Email already exists"
-            res.render(__dirname+'/views/register.ejs', {message:errorMessage});
+/* Handling POST request */ 
+app.post('/register', (req, res)=>{
+    User.register({username: req.body.username, name:req.body.name, lastName: req.body.lastname, admin: false }, req.body.password, (err, user) => {
+        if(err){
+            console.log(err);
+            res.render(__dirname+"/views/register.ejs", {message: err});
         }else{
-            /* register new user */
-            const user = new User({
-                name: fName,
-                lastName: lName,
-                email:user_email,
-                password: user_password,
-                admin: false
+            passport.authenticate('local')(req, res, function(){
+                console.log(user);
+                user.save();
+                res.redirect('/');
             });
-            user.save(); //Save new user
-            res.redirect('/success');
         }
     });
 });
 
 app.post('/login', (req, res)=>{
-    /* Getting the user and password from the form */
-    const user_email = req.body.email;
-    const user_password = req.body.password;
-
-    /* Querying to fetched data */ 
-    User.findOne( {email: user_email}, (err, foundUser)=>{
-        if(err){
-            console.log(err);
+    User.findOne({username : req.body.username}, (err, user) =>{
+        if(err || (user === null)){
+            res.render(__dirname+"/views/login.ejs", {errorMessage: process.env.WRONG_CREDENTIALS});  
         }else{
-            /* Validate credentials to check the data match */
-            if(foundUser){
-                if( foundUser.password === user_password){
-                    console.log("SUCCESS");
-                    res.redirect('/');
+            req.login(user, (error)=>{
+                if(error){
+                    console.log(user);
+                    console.log(error);
+                    res.render(__dirname+"/views/login.ejs", {errorMessage: error});  
                 }else{
-                    console.log("WRONG");
-                    let error_message = "Check your password."
-                    res.render(__dirname+'/views/login.ejs', {message:error_message});
+                    passport.authenticate('local')(req, res, ()=>{
+                        console.log(req.user);
+                        res.redirect('/');
+                    });
                 }
-            }
+            });
         }
     });
 });

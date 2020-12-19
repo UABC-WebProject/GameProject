@@ -1,16 +1,19 @@
 <%- include('header'); %>
-  <section id="register">
-    <form class="login-form" id="" action="/login" method="POST">
-      <h1 class="big-heading">Sign In</h1>
-  		<div class="form-group" >
-    		<input placeholder="Email" type="email" class="form-control" id="exampleInputEmail1" name = "email" aria-describedby="emailHelp" required>
-  		</div>
-  		<div class="form-group">
-        <input placeholder="Password" type="password" class="form-control" id="exampleInputPassword1" name="password" required>
-        <p class="invalid-register-text"><%= message %></p>
-  		</div>
-  		<button id="login-button" type="submit" value="Submit" class="btn btn-primary">Submit</button>
-	  </form>
-  </section>
-    
+  	<section id="register">
+		<div class="row">
+			<div class="col-12">
+				<form class="login-form" id="" action="/login" method="POST">
+					<h1 class="big-heading">Sign In</h1>
+					<div class="form-group" >
+						  <input placeholder="Email" type="email" class="form-control" id="exampleInputEmail1" name = "username" aria-describedby="emailHelp" required>
+					</div>
+					<div class="form-group">
+						  <input placeholder="Password" type="password" class="form-control" id="exampleInputPassword1" name="password" required>
+						  <p class="invalid-register-text"><%= errorMessage %></p  >
+					</div>
+					<button id="login-button" type="submit" value="Submit" class="btn btn-primary">Submit</button>
+			  </form>				
+			</div>
+		</div>
+  	</section>
 <%- include('footer'); %>
