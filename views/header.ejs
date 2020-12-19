@@ -49,8 +49,18 @@
                   <i class="fas fa-user"></i>
                 </a>
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                  <a class="dropdown-item" href="/login"> <h6>Login</h6></a>
-                  <a class="dropdown-item" href="/register"><h6>Register</h6> </a>
+                  <% if (authenticated === true) { %>
+                    <h6 class="dropdown-header">Hello, <%= userLogged.name %> </h6>
+                  <% } %>
+                  <% if( authenticated === false){ %>
+                    <a class="dropdown-item" href="/login"> <h6>Login</h6></a>
+                    <a class="dropdown-item" href="/register"><h6>Register</h6> </a>
+                  <% } %>
+                  <% if (authenticated === true) { %>
+                    <a class="dropdown-item" href="#"> <h6>My games</h6></a>
+                    <a class="dropdown-item" href="/settings"> <h6>My profile</h6></a>
+                    <a class="dropdown-item" href="/logout"> <h6>Logout</h6></a>
+                  <% } %>
                 </div>
               </div>
             </li>

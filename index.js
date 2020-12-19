@@ -118,7 +118,12 @@ app.get("/", (req, res)=>{
 app.get("/xbox", (req, res)=>{
     Videogame.where({console: 2}).find((err, gameList) =>{
         if(!err){
-            res.render(__dirname+"/views/xbox.ejs", {videogameList: gameList});
+            if(req.isAuthenticated()){
+                res.render(__dirname+"/views/xbox.ejs", {videogameList: gameList, userLogged:req.user,authenticated: true});
+            }
+            else{
+                res.render(__dirname+"/views/xbox.ejs", {videogameList: gameList, userLogged:req.user, authenticated: false});
+            }
         }
     });
 });
@@ -126,7 +131,12 @@ app.get("/xbox", (req, res)=>{
 app.get("/ps4", (req, res)=>{
     Videogame.where({console: 1}).find((err, gameList) =>{
         if(!err){
-            res.render(__dirname+"/views/playstation.ejs", {videogameList: gameList});
+            if(req.isAuthenticated()){
+                res.render(__dirname+"/views/xbox.ejs", {videogameList: gameList, userLogged:req.user,authenticated: true});
+            }
+            else{
+                res.render(__dirname+"/views/xbox.ejs", {videogameList: gameList, userLogged:req.user, authenticated: false});
+            }
         }
     });
 });
@@ -134,7 +144,12 @@ app.get("/ps4", (req, res)=>{
 app.get("/switch", (req, res)=>{
     Videogame.where({console: 3}).find((err, gameList) =>{
         if(!err){
-            res.render(__dirname+"/views/switch.ejs", {videogameList: gameList});
+            if(req.isAuthenticated()){
+                res.render(__dirname+"/views/xbox.ejs", {videogameList: gameList, userLogged:req.user,authenticated: true});
+            }
+            else{
+                res.render(__dirname+"/views/xbox.ejs", {videogameList: gameList, userLogged:req.user, authenticated: false});
+            }
         }
     });
 });
@@ -142,18 +157,23 @@ app.get("/switch", (req, res)=>{
 app.get("/pc", (req, res)=>{
     Videogame.where({console: 4}).find((err, gameList) =>{
         if(!err){
-            res.render(__dirname+"/views/pc.ejs", {videogameList: gameList});
+            if(req.isAuthenticated()){
+                res.render(__dirname+"/views/xbox.ejs", {videogameList: gameList, userLogged:req.user,authenticated: true});
+            }
+            else{
+                res.render(__dirname+"/views/xbox.ejs", {videogameList: gameList, userLogged:req.user, authenticated: false});
+            }
         }
     });
 });
 
 app.get("/login", (req, res)=>{
-    res.render(__dirname+"/views/login.ejs", {errorMessage:" "});
+    res.render(__dirname+"/views/login.ejs", {errorMessage:" ", authenticated:false});
 });
 
 app.get("/register", (req, res)=>{
     errorMessage = "";
-    res.render(__dirname+"/views/register.ejs", {message:errorMessage})
+    res.render(__dirname+"/views/register.ejs", {message:errorMessage, authenticated:false})
 });
 
 app.get("/success", (req, res)=>{
@@ -176,6 +196,14 @@ app.get("/uploadVideogame", (req, res)=>{
 
 app.get("/gameInfo", (req, res) =>{
     res.render(__dirname+"/views/gameInfo.ejs");
+});
+
+app.get('/settings', (req, res)=>{
+    if(req.isAuthenticated()){
+        res.render(__dirname + "/views/userSettings.ejs", {userLogged:req.user, authenticated: true})
+    }else{
+        res.redirect('/');
+    }
 });
 
 app.get('/logout', (req, res)=>{

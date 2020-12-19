@@ -284,5 +284,12 @@ p{
 .game-info-img{
     max-width: 50%;
     height: auto;
+}
 
+
+#user-settings{
+    padding: 7% 15% ;
+    position: relative;
+    background-color: #fff;
+    text-align: left;
 }
