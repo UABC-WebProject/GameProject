@@ -1,0 +1,128 @@
+<%- include('header'); %>
+    <section id="upload-game">
+      <% if (status === false) { %>
+        <h1>Register new videogame</h1>
+        <form action="/uploadVideogame" method="POST" enctype="multipart/form-data">
+          <div class="form-group row">
+            <div class="col-sm-6">
+              <input type="text" class="form-control" id="game-title-input" placeholder="Game Title" name="gameTitle">
+            </div>
+          </div>
+          <div class="form-group row">
+            <div class="col-sm-6">
+              <textarea name="gameDescription" placeholder="Description" type="text" class="form-control" rows="4" id="inputPassword3"></textarea>
+            </div>
+          </div>
+          <div class="form-group row">
+            <div class="col-xl-2 col-lg-3 col-md-3 col-sm-4 col-xs-4">
+              <input name="gameScore" placeholder="Score" type="text" class="form-control" id="" >
+            </div>
+          </div>
+          <div class="form-group row">
+            <div class="col-xs-1 col-sm-1 col-md-1 col-lg-2">
+              <select name="gameRating" class="form-control" >
+                <option selected disabled>Rating</option>
+                <option value="E">E</option>
+                <option value="E+10">E+10</option>
+                <option value="T">T</option>
+                <option value="M">M</option>
+                <option value="A">A</option>
+                <option value="RP">RP</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group row">
+            <div class="col-xs-1 col-sm-1 col-md-1 col-lg-2">
+              <select name="gameGenre" class="form-control" >
+                <option selected disabled>Genre</option>
+                <option value="Shooter">Shooter</option>
+                <option value="Sports">Sports</option>
+                <option value="Car">Car</option>
+                <option value="Action">Action</option>
+                <option value="Kids">Kids</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="form-check">
+              <input name="ps4" class="form-check-input" type="checkbox" value="1">
+              <label class="form-check-label" for="flexCheckDefault">
+                PlayStation
+              </label>
+            </div>
+            <div class="form-check">
+              <input name="xbox" class="form-check-input" type="checkbox" value="2" id="">
+              <label class="form-check-label" for="flexCheckChecked">
+                Xbox One
+              </label>
+            </div>
+            <div class="form-check">
+              <input name="switch" class="form-check-input" type="checkbox" value="3" id="">
+              <label class="form-check-label" for="flexCheckChecked">
+                Nintendo Switch
+              </label>
+            </div>
+            <div class="form-check">
+              <input name="pc" class="form-check-input" type="checkbox" value="4" id="">
+              <label class="form-check-label" for="flexCheckChecked">
+                PC
+              </label>
+            </div>
+          </div>
+          
+          <div class="form-group row">
+            <div class="col-xs-1 col-sm-1 col-md-1 col-lg-2">
+              <select name="gameStore" class="form-control" >
+                <option selected disabled>Available in: </option>
+                <option value="Amazon">Amazon</option>
+                <option value="Best Buy">Best Buy</option>
+                <option value="Game Stop">Game Stop</option>
+                <option value="Walmart">Walmart</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group row">
+            <div class="col-sm-6">
+              <input name="gameStoreUrl" placeholder="Game Url..." type="text" class="form-control" id="">
+            </div>
+          </div>
+          <fieldset class="form-group">
+            <div class="row">
+              <div class="col-lg-6 col-md-4 col-sm-2" >
+                <input  type="file" name="gameImage" required>
+              </div>
+            </div>
+          </fieldset>
+          
+          <button class="btn btn-success" type="submit" value="Submit">Upload</button>
+        </form>
+      <% } else { %>
+        <% if (previewImage != " ") { %>
+          <h3>Succesfully uploaded <i class="fas fa-check-circle"></i> </h3>
+          <img class="game-image-upload" src= <%= previewImage %> alt= <%= imageAlt %>>
+          <hr class="hLine">
+          <h4>Title</h4>
+          <p> <%=  %>  </p>
+          <h4>Description</h4>
+          <p> <%=  %>  </p>
+          <h4>Score</h4>
+          <p> <%= score %>  </p>
+          <h4>Genre</h4>
+          <p> <%= genre %>  </p>
+          <h4>Rate</h4>
+          <p> <%= rate %>  </p>
+          <h4>Available in</h4>
+          <p> <%= console %>  </p>
+          <h4>Where to buy</h4>
+          <p> <%=  %>  </p>
+          <hr class="hLine">
+          <div class="row">
+            <div class="col-lg-6 col-md-4 col-sm-2">
+              <a class="btn btn-warning btn-lg" href="/" role="button">Home</a>
+            </div>
+          </div>
+        <% } %>
+      <%  } %>
+    </section>
+    
+<%- include('footer'); %>

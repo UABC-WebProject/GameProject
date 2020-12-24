@@ -1,0 +1,13 @@
+<%- include('header'); %>
+<section class="delete-account-section">
+    <form class="row" action="/deleteAccount" method="POST">
+        <div class="col-lg-12">
+            <label for="deleteAccountConfirmation">Enter your password to confirm</label>
+            <input type="password" class="form-control" id="deleteAccountConfirmation" name="userPassword" placeholder="Password">
+            <button type="submit" class="btn btn-danger submit-button" value="Submit">Delete</button>
+        </div>
+        <h6><%= errorMessage %> </h6>
+        
+    </form>
+</section>
+<%- include('footer'); %>

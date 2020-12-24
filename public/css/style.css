@@ -253,3 +253,59 @@ p{
 #game-title-input{
     color: black;
 }
+
+.game-image-upload{
+    padding-top: .5rem;
+    padding-bottom: .5rem;
+    width: 20%;
+}
+
+
+#ps4-list-game{
+    padding: 7% 15% ;
+    position: relative;
+    background-color: #fff;
+    text-align: left;
+}
+
+.game-anchor{
+    color: #000;
+    text-decoration: none;
+}
+.game-anchor:hover{
+    color: #000;
+    text-decoration: none;
+}
+
+.ps4-list-game{
+    padding: 3rem;
+}
+
+.game-info-img{
+    max-width: 50%;
+    height: auto;
+}
+
+
+#user-settings{
+    padding: 7% 15% ;
+    position: relative;
+    background-color: #fff;
+    text-align: left;
+}
+
+.delete-account-section{
+    border-color: #FABC3C;
+    margin: 1rem;
+    border-radius: 8px;
+    border-style: solid;
+    border-width: 0.3rem;
+    display: inline-block;
+    padding: 10%;
+    background-color: #fff;
+    text-align: left;
+}
+
+.submit-button{
+    margin-top: 0.3rem;
+}

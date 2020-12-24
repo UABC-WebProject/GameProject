@@ -1,0 +1,18 @@
+<%- include('header') %>
+<section id="user-settings">
+    <h1>General Information </h1>
+    <form action="/updateUserInfo" method="POST" >
+        <div class="form-row">
+            <div class="form-group col-md-8">
+                <label for="currentPassword">Current Password</label>
+                <input type="password" class="form-control" id="currentPassword" name="currentPassword">
+            </div>
+            <div class="form-group col-md-8">
+                <label for="newPassword">New Password</label>
+                <input type="password" class="form-control" id="newPassword" name="newPassword" >
+            </div>
+        </div>
+        <button class="btn btn-dark" type="submit">Change my password</button>
+    </form>
+</section>
+<%- include('footer') %> 

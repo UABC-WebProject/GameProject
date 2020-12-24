@@ -1,62 +1,177 @@
-const React = require('react');
-const ReactDOM = require('react-dom');
+require('dotenv').config();
+
+/* All dependecies required */
+const multer = require('multer');
 const ejs = require('ejs');
 const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
 const mongoose = require('mongoose');
-const url = 'mongodb://localhost:27017/gamespotDB';
-
-app.set('view engine', 'ejs');
-
-app.use(express.static("public"));
-app.use(bodyParser.urlencoded({extended:true}));
-
+const session = require('express-session');
+const passport = require("passport");
+const passportLocalMongoose = require('passport-local-mongoose');
+//const passportLocal = require('passport-local');
+var currentUser;
 /*If register fails messages*/
 let errorMessage; 
 
+var options = {
+    errorMessages: {
+        MissingPasswordError: 'No password was given',
+        AttemptTooSoonError: 'Account is currently locked. Try again later',
+        TooManyAttemptsError: 'Account locked due to too many failed login attempts',
+        NoSaltValueStoredError: 'Authentication not possible. No salt value stored',
+        IncorrectPasswordError: 'Password or username are incorrect',
+        IncorrectUsernameError: 'Password or username are incorrect',
+        MissingUsernameError: 'No username was given',
+        UserExistsError: 'A user with the given username is already registered'
+    }
+};
+
+/*DB URL */
+const url = 'mongodb://localhost:27017/gamespotDB';
+
+/* configure how the image gonna be store */
+const storage = multer.diskStorage({
+    destination: function(req, file, cb){
+        cb(null, 'public/images/');
+    },
+    filename: function(req, file, cb){
+        cb(null, file.originalname)
+    }
+});
+
+var upload = multer({storage:storage});
+
+app.set('view engine', 'ejs');
+app.use(express.static("public"));
+app.use(bodyParser.urlencoded({extended:true}));
+
+app.use(session({
+    secret: "Our little secret.",
+    resave: false,
+    saveUninitialized: false
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+
 /* connection to the MongoDB */ 
 mongoose.connect(url, {useNewUrlParser: true, useUnifiedTopology: true});
+mongoose.set("useCreateIndex", true);
 
+/*DB collections */
 const userSchema = new mongoose.Schema({
-    _id: Number,
     name: String,
     lastName: String,
     email: String,
     password: String,
     admin: Boolean
 });
+userSchema.plugin(passportLocalMongoose);
 
-const User = mongoose.model("User", userSchema);
+/* Get a reference of the Schemas created above */
+const User = new mongoose.model("User", userSchema);
+
+passport.use(User.createStrategy());
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser()); 
+
+
+const storeSchema = new mongoose.Schema({
+    storeName: String,
+    storeUrl: String
+});
+const Store = mongoose.model("Store", storeSchema);
+
+const consoleSchema = mongoose.Schema({
+    _id: Number,
+    consoleName: String
+});
+const Console = mongoose.model("Console", consoleSchema);
+
+const videogameSchema = new mongoose.Schema({
+    _id: Number,
+    title: String,
+    description: String,
+    path: String,
+    genre: String,
+    rate: String,
+    score: Number,
+    store: Array,
+    console: [Number]
+});
+const Videogame = mongoose.model("Videogame", videogameSchema);
 
 /* Get methods to access different html files */
 app.get("/", (req, res)=>{
-    res.sendFile(__dirname+"/index.html"  );
+    if(req.isAuthenticated()){
+        res.render(__dirname+"/index.ejs", {landPage: "GameSpot", userLogged: req.user, authenticated:true});
+    }else{
+        res.render(__dirname+"/index.ejs", {authenticated:false});
+    }
 });
 
 app.get("/xbox", (req, res)=>{
-    res.sendFile(__dirname+"/html/xbox.html");
+    Videogame.where({console: 2}).find((err, gameList) =>{
+        if(!err){
+            if(req.isAuthenticated()){
+                res.render(__dirname+"/views/xbox.ejs", {landPage: "GameSpot - Xbox One", videogameList: gameList, userLogged:req.user,authenticated: true});
+            }
+            else{
+                res.render(__dirname+"/views/xbox.ejs", {landPage: "GameSpot - Xbox One", videogameList: gameList, userLogged:req.user, authenticated: false});
+            }
+        }
+    });
 });
 
 app.get("/ps4", (req, res)=>{
-    res.sendFile(__dirname+"/html/playstation.html");
+    Videogame.where({console: 1}).find((err, gameList) =>{
+        if(!err){
+            if(req.isAuthenticated()){
+                res.render(__dirname+"/views/xbox.ejs", {landPage: "GameSpot - Play Station 4", videogameList: gameList, userLogged:req.user,authenticated: true});
+            }
+            else{
+                res.render(__dirname+"/views/xbox.ejs", {landPage: "GameSpot - Play Station 4", videogameList: gameList, userLogged:req.user, authenticated: false});
+            }
+        }
+    });
 });
 
 app.get("/switch", (req, res)=>{
-    res.sendFile(__dirname+"/html/switch.html");
+    Videogame.where({console: 3}).find((err, gameList) =>{
+        if(!err){
+            if(req.isAuthenticated()){
+                res.render(__dirname+"/views/xbox.ejs", {landPage: "GameSpot - Nintendo Switch", videogameList: gameList, userLogged:req.user,authenticated: true});
+            }
+            else{
+                res.render(__dirname+"/views/xbox.ejs", {landPage: "GameSpot - Nintendo Switch",videogameList: gameList, userLogged:req.user, authenticated: false});
+            }
+        }
+    });
 });
 
 app.get("/pc", (req, res)=>{
-    res.sendFile(__dirname+"/html/pc.html");
+    Videogame.where({console: 4}).find((err, gameList) =>{
+        if(!err){
+            if(req.isAuthenticated()){
+                res.render(__dirname+"/views/xbox.ejs", {landPage: "GameSpot-PC",videogameList: gameList, userLogged:req.user,authenticated: true});
+            }
+            else{
+                res.render(__dirname+"/views/xbox.ejs", {landPage: "GameSpot-PC",videogameList: gameList, userLogged:req.user, authenticated: false});
+            }
+        }
+    });
 });
 
 app.get("/login", (req, res)=>{
-    res.render(__dirname+"/views/login.ejs", {message:" "});
+    res.render(__dirname+"/views/login.ejs", {landPage: "Login", errorMessage:" ", authenticated:false});
 });
 
 app.get("/register", (req, res)=>{
     errorMessage = "";
-    res.render(__dirname+"/views/register.ejs", {message:errorMessage})
+    res.render(__dirname+"/views/register.ejs", {landPage: "Register", message:errorMessage, authenticated:false})
 });
 
 app.get("/success", (req, res)=>{
@@ -68,64 +183,190 @@ app.get("/failure", (req, res)=>{
 });
 
 app.get("/uploadVideogame", (req, res)=>{
-    res.sendFile(__dirname+"/html/uploadVideogame.html");
+    if(req.isAuthenticated() && (currentUser.admin === true)){
+        res.render(__dirname+"/views/uploadVideogame.ejs", {landPage: "Upload Complete", previewImage: " ", userLogged:req.user , authenticated: true ,status: false});
+    }else{
+        res.redirect('/');
+    }
 });
 
+app.get("/gameInfo", (req, res) =>{
+    if(req.isAuthenticated()){
+        res.render(__dirname+"/views/gameInfo.ejs", {landPage: "GameSpot",authenticated: true, userLogged: currentUser});
+    }else{
+        res.render(__dirname+"/views/gameInfo.ejs", {landPage: "GameSpot", authenticated: false});
+    }
+});
+
+app.get('/settings', (req, res)=>{
+    if(req.isAuthenticated()){
+        res.render(__dirname + "/views/userSettings.ejs", {landPage: "Settings",userLogged:req.user, authenticated: true})
+    }else{
+        res.redirect('/');
+    }
+});
+
+app.get('/logout', (req, res)=>{
+    req.logout();
+    res.redirect('/');
+});
+
+app.get('/deleteAccount', (req, res)=>{
+    if(req.isAuthenticated()){
+        res.render(__dirname+"/views/accountDeleted.ejs", {landPage: "Warning!",userLogged:currentUser, authenticated: true, errorMessage: ""})
+    }else{
+        res.redirect('/');
+    }
+});
+
+app.get('/success', (req, res)=>{
+    res.render(__dirname + "/views/success.ejs",{successMessage: "",landPage: "Success!"});
+});
+
+app.get('/updateUserInfo', (req, res)=>{
+    res.render(__dirname + "/views/updateUserInfo.ejs",{successMessage: "", userLogged: currentUser, authenticated: true, landPage: "Update info"});
+});
+
+/* Handling POST request */ 
 app.post('/register', (req, res)=>{
-    const fName = req.body.name;
-    const lName = req.body.lastname;
-    const user_password = req.body.password;
-    const user_email = req.body.email;
-    User.where({email: user_email}).findOne((err, getEmail)=>{
-        if(err || getEmail != null){
-            errorMessage = "*Email already exists"
-            res.render(__dirname+'/views/register.ejs', {message:errorMessage});
+    User.register({username: req.body.username, name:req.body.name, lastName: req.body.lastname, admin: false }, req.body.password, (err, user) => {
+        if(err){
+            console.log(err);
+            res.render(__dirname+"/views/register.ejs", {landPage: "Register", message: err});
         }else{
-            User.find((err, userList)=>{
-                if(err){
-                    res.redirect('/failure');
-                }else{
-                    /* register new user */
-                    const user = new User({
-                        _id: userList.length + 1,
-                        name: fName,
-                        lastName: lName,
-                        email:user_email,
-                        password: user_password,
-                        admin: false
-                    });
-                    user.save();
-                    res.redirect('/success');
-                }
+            passport.authenticate('local')(req, res, function(){
+                user.save();
+                currentUser = user;
+                console.log("Regiser succesful: "+ user);
+                res.redirect('/');
             });
         }
     });
 });
 
 app.post('/login', (req, res)=>{
-    const user_email = req.body.email;
-    const user_password = req.body.password;
-    let error_message; 
-
-    User.where(user_email).findOne((err, users)=>{
-        if(err){
-            console.log(err);
+    User.findOne({username : req.body.username}, (err, user) =>{
+        if(err || (user === null)){
+            res.render(__dirname+"/views/login.ejs", {landPage: "Login", errorMessage: process.env.WRONG_CREDENTIALS});  
         }else{
-            if(users.password === user_password){
-                console.log("SUCCESS");
-                res.redirect('/');
-            }else{
-                console.log("WRONG");
-                error_message = "Check your password."
-                res.render(__dirname+'/views/login.ejs', {message:error_message});
-                //res.redirect('/login');
-            }
+            req.login(user, (error)=>{
+                if(error){
+                    console.log(user);
+                    console.log(error);
+                    res.render(__dirname+"/views/login.ejs", {landPage: "Login", errorMessage: error});  
+                }else{
+                    passport.authenticate('local')(req, res, ()=>{
+                        currentUser = req.user;
+                        res.redirect('/');
+                    });
+                }
+            });
         }
-    })
+    });
+});
+
+app.post('/uploadVideogame',upload.single('gameImage'), (req, res) =>{
+    console.log(req.user);
+    var imageAlt = `Image ${req.file.filename} isn't available`;
+    var imageRoute = '../images/' + req.file.filename;
+    var consoleAvailability = [];
+    var gameScore = Number(req.body.gameScore);
+    var gameRate = req.body.gameRating;
+    var gameGenre = req.body.gameGenre;
+
+    /* Adds the console availability */
+    if(req.body.ps4 != undefined)
+        consoleAvailability.push(Number(req.body.ps4));
+    if(req.body.xbox != undefined)
+        consoleAvailability.push(Number(req.body.xbox));
+    if(req.body.switch != undefined)
+        consoleAvailability.push(Number(req.body.switch));
+    if(req.body.pc != undefined)
+        consoleAvailability.push(Number(req.body.pc));
+
+    const store = new Store({
+        storeName: req.body.gameStore,
+        storeUrl: req.body.gameStoreUrl 
+    });
+    Videogame.find( (err, gameList) => {
+        if(!err){
+            const videogame = new Videogame({
+                _id: gameList.length + 1,
+                title: req.body.gameTitle,
+                description:req.body.gameDescription,
+                path: imageRoute,
+                score: gameScore,
+                genre: gameGenre,
+                rate: gameRate,
+                console: consoleAvailability,
+                store: store
+            });
+            /* Saving the videogame in the DB */
+            videogame.save();
+
+            /* Redirecting to the updated page */
+            res.render(__dirname+"/views/uploadVideogame.ejs", {
+                previewImage:  imageRoute,
+                imageAlt: imageAlt, 
+                status: true,
+                score: gameScore,
+                rate: gameRate,
+                genre: gameGenre,
+                authenticated: true,
+                userLogged: currentUser,
+                landPage: "Upload Complete"
+            });
+        }
+    });
+});
+
+app.post('/gameInfo', (req, res) => {
+    console.log(req.body.gameId);
+    console.log('#########################################');
+    Videogame.where({_id : req.body.gameId}).findOne((err, selectedGame) =>{
+        if(!err){
+            console.log(selectedGame);
+            res.render(__dirname+"/views/gameInfo.ejs", {landPage: "GameSpot", selectedGame: selectedGame, userLogged: currentUser, authenticated: true});
+        }
+    });
+});
+
+app.post("/deleteAccount", (req, res) =>{
+    currentUser.authenticate(req.body.userPassword, (err, thisModel, passwordErr)=>{
+        if(err || passwordErr){
+            console.log("err: " + err);
+            console.log("passwordErr: " + passwordErr);
+            res.redirect('/deleteAccount');
+        }else{
+            console.log("User"+ thisModel.username +" could be delete now!!!");
+            const query = {username: {$eq: currentUser.username} };
+            User.deleteOne( query, (error) => {
+                if(error){
+                    res.redirect('/deleteAccount');
+                }else{
+                    res.render(__dirname + "/views/success.ejs", {landPage: "GameSpot", successMessage:"Account was deleted successfully.", authenticated: false});
+                }
+            });
+        }
+    });
+});
+
+app.post('/updateUserInfo', (req, res) =>{
+    console.log("I'm handling the change password method");
+    const oldPassword = req.body.currentPassword;
+    const newPassword = req.body.newPassword;
+    currentUser.changePassword(oldPassword, newPassword, (err, thisModel, passwordErr)=>{
+        if(err || passwordErr){
+            console.log("err:" + err);
+            console.log("passwordErr:" + passwordErr);
+            res.redirect("/updateUserInfo");
+        }else{
+            res.render(__dirname + "/views/success.ejs", {userLogged: currentUser,landPage: "GameSpot", successMessage: "Password update succesfully ", authenticated:true, });
+        }
+    });
 });
 
 //App listen on port 3000
 app.listen(3000, ()=>{
     console.log("Server started on port 3000");
 });
-
