@@ -107,7 +107,7 @@ const Videogame = mongoose.model("Videogame", videogameSchema);
 /* Get methods to access different html files */
 app.get("/", (req, res)=>{
     if(req.isAuthenticated()){
-        res.render(__dirname+"/index.ejs", {userLogged: req.user, authenticated:true});
+        res.render(__dirname+"/index.ejs", {landPage: "GameSpot", userLogged: req.user, authenticated:true});
     }else{
         res.render(__dirname+"/index.ejs", {authenticated:false});
     }
@@ -117,10 +117,10 @@ app.get("/xbox", (req, res)=>{
     Videogame.where({console: 2}).find((err, gameList) =>{
         if(!err){
             if(req.isAuthenticated()){
-                res.render(__dirname+"/views/xbox.ejs", {videogameList: gameList, userLogged:req.user,authenticated: true});
+                res.render(__dirname+"/views/xbox.ejs", {landPage: "GameSpot - Xbox One", videogameList: gameList, userLogged:req.user,authenticated: true});
             }
             else{
-                res.render(__dirname+"/views/xbox.ejs", {videogameList: gameList, userLogged:req.user, authenticated: false});
+                res.render(__dirname+"/views/xbox.ejs", {landPage: "GameSpot - Xbox One", videogameList: gameList, userLogged:req.user, authenticated: false});
             }
         }
     });
@@ -130,10 +130,10 @@ app.get("/ps4", (req, res)=>{
     Videogame.where({console: 1}).find((err, gameList) =>{
         if(!err){
             if(req.isAuthenticated()){
-                res.render(__dirname+"/views/xbox.ejs", {videogameList: gameList, userLogged:req.user,authenticated: true});
+                res.render(__dirname+"/views/xbox.ejs", {landPage: "GameSpot - Play Station 4", videogameList: gameList, userLogged:req.user,authenticated: true});
             }
             else{
-                res.render(__dirname+"/views/xbox.ejs", {videogameList: gameList, userLogged:req.user, authenticated: false});
+                res.render(__dirname+"/views/xbox.ejs", {landPage: "GameSpot - Play Station 4", videogameList: gameList, userLogged:req.user, authenticated: false});
             }
         }
     });
@@ -143,10 +143,10 @@ app.get("/switch", (req, res)=>{
     Videogame.where({console: 3}).find((err, gameList) =>{
         if(!err){
             if(req.isAuthenticated()){
-                res.render(__dirname+"/views/xbox.ejs", {videogameList: gameList, userLogged:req.user,authenticated: true});
+                res.render(__dirname+"/views/xbox.ejs", {landPage: "GameSpot - Nintendo Switch", videogameList: gameList, userLogged:req.user,authenticated: true});
             }
             else{
-                res.render(__dirname+"/views/xbox.ejs", {videogameList: gameList, userLogged:req.user, authenticated: false});
+                res.render(__dirname+"/views/xbox.ejs", {landPage: "GameSpot - Nintendo Switch",videogameList: gameList, userLogged:req.user, authenticated: false});
             }
         }
     });
@@ -156,22 +156,22 @@ app.get("/pc", (req, res)=>{
     Videogame.where({console: 4}).find((err, gameList) =>{
         if(!err){
             if(req.isAuthenticated()){
-                res.render(__dirname+"/views/xbox.ejs", {videogameList: gameList, userLogged:req.user,authenticated: true});
+                res.render(__dirname+"/views/xbox.ejs", {landPage: "GameSpot-PC",videogameList: gameList, userLogged:req.user,authenticated: true});
             }
             else{
-                res.render(__dirname+"/views/xbox.ejs", {videogameList: gameList, userLogged:req.user, authenticated: false});
+                res.render(__dirname+"/views/xbox.ejs", {landPage: "GameSpot-PC",videogameList: gameList, userLogged:req.user, authenticated: false});
             }
         }
     });
 });
 
 app.get("/login", (req, res)=>{
-    res.render(__dirname+"/views/login.ejs", {errorMessage:" ", authenticated:false});
+    res.render(__dirname+"/views/login.ejs", {landPage: "Login", errorMessage:" ", authenticated:false});
 });
 
 app.get("/register", (req, res)=>{
     errorMessage = "";
-    res.render(__dirname+"/views/register.ejs", {message:errorMessage, authenticated:false})
+    res.render(__dirname+"/views/register.ejs", {landPage: "Register", message:errorMessage, authenticated:false})
 });
 
 app.get("/success", (req, res)=>{
@@ -184,7 +184,7 @@ app.get("/failure", (req, res)=>{
 
 app.get("/uploadVideogame", (req, res)=>{
     if(req.isAuthenticated() && (currentUser.admin === true)){
-        res.render(__dirname+"/views/uploadVideogame.ejs", {previewImage: " ", userLogged:req.user , authenticated: true ,status: false});
+        res.render(__dirname+"/views/uploadVideogame.ejs", {landPage: "Upload Complete", previewImage: " ", userLogged:req.user , authenticated: true ,status: false});
     }else{
         res.redirect('/');
     }
@@ -192,15 +192,15 @@ app.get("/uploadVideogame", (req, res)=>{
 
 app.get("/gameInfo", (req, res) =>{
     if(req.isAuthenticated()){
-        res.render(__dirname+"/views/gameInfo.ejs", {authenticated: true, userLogged: currentUser});
+        res.render(__dirname+"/views/gameInfo.ejs", {landPage: "GameSpot",authenticated: true, userLogged: currentUser});
     }else{
-        res.render(__dirname+"/views/gameInfo.ejs", {authenticated: false});
+        res.render(__dirname+"/views/gameInfo.ejs", {landPage: "GameSpot", authenticated: false});
     }
 });
 
 app.get('/settings', (req, res)=>{
     if(req.isAuthenticated()){
-        res.render(__dirname + "/views/userSettings.ejs", {userLogged:req.user, authenticated: true})
+        res.render(__dirname + "/views/userSettings.ejs", {landPage: "Settings",userLogged:req.user, authenticated: true})
     }else{
         res.redirect('/');
     }
@@ -211,15 +211,33 @@ app.get('/logout', (req, res)=>{
     res.redirect('/');
 });
 
+app.get('/deleteAccount', (req, res)=>{
+    if(req.isAuthenticated()){
+        res.render(__dirname+"/views/accountDeleted.ejs", {landPage: "Warning!",userLogged:currentUser, authenticated: true, errorMessage: ""})
+    }else{
+        res.redirect('/');
+    }
+});
+
+app.get('/success', (req, res)=>{
+    res.render(__dirname + "/views/success.ejs",{successMessage: "",landPage: "Success!"});
+});
+
+app.get('/updateUserInfo', (req, res)=>{
+    res.render(__dirname + "/views/updateUserInfo.ejs",{successMessage: "", userLogged: currentUser, authenticated: true, landPage: "Update info"});
+});
+
 /* Handling POST request */ 
 app.post('/register', (req, res)=>{
     User.register({username: req.body.username, name:req.body.name, lastName: req.body.lastname, admin: false }, req.body.password, (err, user) => {
         if(err){
             console.log(err);
-            res.render(__dirname+"/views/register.ejs", {message: err});
+            res.render(__dirname+"/views/register.ejs", {landPage: "Register", message: err});
         }else{
             passport.authenticate('local')(req, res, function(){
                 user.save();
+                currentUser = user;
+                console.log("Regiser succesful: "+ user);
                 res.redirect('/');
             });
         }
@@ -229,13 +247,13 @@ app.post('/register', (req, res)=>{
 app.post('/login', (req, res)=>{
     User.findOne({username : req.body.username}, (err, user) =>{
         if(err || (user === null)){
-            res.render(__dirname+"/views/login.ejs", {errorMessage: process.env.WRONG_CREDENTIALS});  
+            res.render(__dirname+"/views/login.ejs", {landPage: "Login", errorMessage: process.env.WRONG_CREDENTIALS});  
         }else{
             req.login(user, (error)=>{
                 if(error){
                     console.log(user);
                     console.log(error);
-                    res.render(__dirname+"/views/login.ejs", {errorMessage: error});  
+                    res.render(__dirname+"/views/login.ejs", {landPage: "Login", errorMessage: error});  
                 }else{
                     passport.authenticate('local')(req, res, ()=>{
                         currentUser = req.user;
@@ -295,7 +313,8 @@ app.post('/uploadVideogame',upload.single('gameImage'), (req, res) =>{
                 rate: gameRate,
                 genre: gameGenre,
                 authenticated: true,
-                userLogged: currentUser
+                userLogged: currentUser,
+                landPage: "Upload Complete"
             });
         }
     });
@@ -307,7 +326,42 @@ app.post('/gameInfo', (req, res) => {
     Videogame.where({_id : req.body.gameId}).findOne((err, selectedGame) =>{
         if(!err){
             console.log(selectedGame);
-            res.render(__dirname+"/views/gameInfo.ejs", {selectedGame: selectedGame, userLogged: currentUser, authenticated: true});
+            res.render(__dirname+"/views/gameInfo.ejs", {landPage: "GameSpot", selectedGame: selectedGame, userLogged: currentUser, authenticated: true});
+        }
+    });
+});
+
+app.post("/deleteAccount", (req, res) =>{
+    currentUser.authenticate(req.body.userPassword, (err, thisModel, passwordErr)=>{
+        if(err || passwordErr){
+            console.log("err: " + err);
+            console.log("passwordErr: " + passwordErr);
+            res.redirect('/deleteAccount');
+        }else{
+            console.log("User"+ thisModel.username +" could be delete now!!!");
+            const query = {username: {$eq: currentUser.username} };
+            User.deleteOne( query, (error) => {
+                if(error){
+                    res.redirect('/deleteAccount');
+                }else{
+                    res.render(__dirname + "/views/success.ejs", {landPage: "GameSpot", successMessage:"Account was deleted successfully.", authenticated: false});
+                }
+            });
+        }
+    });
+});
+
+app.post('/updateUserInfo', (req, res) =>{
+    console.log("I'm handling the change password method");
+    const oldPassword = req.body.currentPassword;
+    const newPassword = req.body.newPassword;
+    currentUser.changePassword(oldPassword, newPassword, (err, thisModel, passwordErr)=>{
+        if(err || passwordErr){
+            console.log("err:" + err);
+            console.log("passwordErr:" + passwordErr);
+            res.redirect("/updateUserInfo");
+        }else{
+            res.render(__dirname + "/views/success.ejs", {userLogged: currentUser,landPage: "GameSpot", successMessage: "Password update succesfully ", authenticated:true, });
         }
     });
 });
@@ -316,4 +370,3 @@ app.post('/gameInfo', (req, res) => {
 app.listen(3000, ()=>{
     console.log("Server started on port 3000");
 });
-

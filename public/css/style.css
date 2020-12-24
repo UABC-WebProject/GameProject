@@ -293,3 +293,19 @@ p{
     background-color: #fff;
     text-align: left;
 }
+
+.delete-account-section{
+    border-color: #FABC3C;
+    margin: 1rem;
+    border-radius: 8px;
+    border-style: solid;
+    border-width: 0.3rem;
+    display: inline-block;
+    padding: 10%;
+    background-color: #fff;
+    text-align: left;
+}
+
+.submit-button{
+    margin-top: 0.3rem;
+}
