@@ -1,0 +1,59 @@
+<%- include('header') %>
+
+<div class="row game-edit-info">
+    <h1>General Info</h1>
+    <hr>
+    <div class="col-lg-12">
+        <form method="POST" action="/editGameInfo" class="form-floating">
+            <label for="videogame-score">ID #</label>
+            <input name="gameId" type="text" class="form-input-info form-control" id="videogame-id" placeholder="" value=<%= videogame._id %>>
+
+            <label for="videogame-title">Game title</label>
+            <textarea  name="gameTitle" class="form-input-info form-control" id="videogame-title" style="height: 70px; text-align: left;">
+                <%= videogame.title %>
+            </textarea>
+            
+            <label for="videogame-description">Description</label>
+            <textarea name="gameDescription" class="form-input-info form-control" id="videogame-description" style="height: 100px; text-align: left;">
+                <%= videogame.description %>
+            </textarea>
+            
+            <label for="videogame-score">Score</label>
+            <input name="gameScore" type="text" class="form-input-info form-control" id="videogame-score" placeholder="name@example.com" value=<%= videogame.score %>>
+
+            <select  id="videogame-age-rate" name="gameRating" class="form-input-info form-control" >
+                <option selected disabled>Age Restriction</option>
+                <option value="E">E</option>
+                <option value="E+10">E+10</option>
+                <option value="T">T</option>
+                <option value="M">M</option>
+                <option value="A">A</option>
+                <option value="RP">RP</option>
+            </select>
+
+            <select id="videogame-genre" name="gameGenre" class="form-input-info form-control" >
+                <option selected disabled>Genre</option>
+                <option value="Shooter">Shooter</option>
+                <option value="Sports">Sports</option>
+                <option value="Car">Car</option>
+                <option value="Action">Action</option>
+                <option value="Kids">Kids</option>
+            </select>
+
+            <select name="gameStore" class="form-input-info form-control" >
+                <option selected disabled>Available in: </option>
+                <option value="Amazon">Amazon</option>
+                <option value="Best Buy">Best Buy</option>
+                <option value="Game Stop">Game Stop</option>
+                <option value="Walmart">Walmart</option>
+              </select>
+
+              <input name="gameStoreUrl" placeholder="Game Url..." type="text" class="form-input-info form-control" id="">
+              <button class="btn btn-success" type="submit" value="Submit">Update</button>
+              <a href="/" class="btn btn-danger"  value="Submit">Cancel</a>
+
+        </form>
+    </div>
+   
+</div> 
+<%- include('footer') %> 

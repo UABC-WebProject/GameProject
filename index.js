@@ -10,8 +10,9 @@ const mongoose = require('mongoose');
 const session = require('express-session');
 const passport = require("passport");
 const passportLocalMongoose = require('passport-local-mongoose');
+const { query } = require('express');
 //const passportLocal = require('passport-local');
-var currentUser;
+var currentUser = null;
 /*If register fails messages*/
 let errorMessage; 
 
@@ -62,22 +63,6 @@ mongoose.connect(url, {useNewUrlParser: true, useUnifiedTopology: true});
 mongoose.set("useCreateIndex", true);
 
 /*DB collections */
-const userSchema = new mongoose.Schema({
-    name: String,
-    lastName: String,
-    email: String,
-    password: String,
-    admin: Boolean
-});
-userSchema.plugin(passportLocalMongoose);
-
-/* Get a reference of the Schemas created above */
-const User = new mongoose.model("User", userSchema);
-
-passport.use(User.createStrategy());
-passport.serializeUser(User.serializeUser());
-passport.deserializeUser(User.deserializeUser()); 
-
 
 const storeSchema = new mongoose.Schema({
     storeName: String,
@@ -100,9 +85,30 @@ const videogameSchema = new mongoose.Schema({
     rate: String,
     score: Number,
     store: Array,
+    developer: String,
     console: [Number]
 });
 const Videogame = mongoose.model("Videogame", videogameSchema);
+
+const userSchema = new mongoose.Schema({
+    name: String,
+    lastName: String,
+    email: String,
+    password: String,
+    admin: Boolean,
+    gameList: Array
+});
+userSchema.plugin(passportLocalMongoose);
+
+/* Get a reference of the Schemas created above */
+const User = new mongoose.model("User", userSchema);
+
+passport.use(User.createStrategy());
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser()); 
+
+
+
 
 /* Get methods to access different html files */
 app.get("/", (req, res)=>{
@@ -174,9 +180,6 @@ app.get("/register", (req, res)=>{
     res.render(__dirname+"/views/register.ejs", {landPage: "Register", message:errorMessage, authenticated:false})
 });
 
-app.get("/success", (req, res)=>{
-    res.sendFile(__dirname+"/html/success.html");
-});
 
 app.get("/failure", (req, res)=>{
     res.sendFile(__dirname+"/html/failure.html");
@@ -194,7 +197,7 @@ app.get("/gameInfo", (req, res) =>{
     if(req.isAuthenticated()){
         res.render(__dirname+"/views/gameInfo.ejs", {landPage: "GameSpot",authenticated: true, userLogged: currentUser});
     }else{
-        res.render(__dirname+"/views/gameInfo.ejs", {landPage: "GameSpot", authenticated: false});
+        res.render(__dirname+"/views/gameInfo.ejs", {landPage: "GameSpot", authenticated: false, userLogged: null});
     }
 });
 
@@ -207,7 +210,10 @@ app.get('/settings', (req, res)=>{
 });
 
 app.get('/logout', (req, res)=>{
-    req.logout();
+    if(req.isAuthenticated()){
+        req.logout();
+        currentUser = null;
+    }
     res.redirect('/');
 });
 
@@ -219,12 +225,42 @@ app.get('/deleteAccount', (req, res)=>{
     }
 });
 
-app.get('/success', (req, res)=>{
-    res.render(__dirname + "/views/success.ejs",{successMessage: "",landPage: "Success!"});
-});
 
 app.get('/updateUserInfo', (req, res)=>{
-    res.render(__dirname + "/views/updateUserInfo.ejs",{successMessage: "", userLogged: currentUser, authenticated: true, landPage: "Update info"});
+    if(req.isAuthenticated()){
+        res.render(__dirname + "/views/updateUserInfo.ejs",{message: "", userLogged: currentUser, authenticated: true, landPage: "Update info"});
+    }else{
+        res.redirect('/login');
+    }
+});
+
+app.get('/gameList', (req, res)=>{
+    if(req.isAuthenticated()){
+        //console.log("Number of list: " + currentUser.gameList.length);
+        User.findOne({username: currentUser.username}, (err, updateUser) =>{
+            if(!err){
+                console.log("current user (lenght size): " + currentUser.gameList.length);
+                res.render(__dirname + "/views/userGameList.ejs",{successMessage: "", userLogged: updateUser, authenticated: true, landPage: "My game list"});
+            }
+        });
+    }else{
+        res.redirect('/login');
+    }
+});
+
+app.get('/editGameInfo', (req, res)=>{
+    if(req.isAuthenticated()){
+        console.log("Videogame ID: " + req.query.videoGameId);
+        const query = {_id: req.query.videoGameId}
+        Videogame.findOne(query, (err, foundGame) =>{
+            if(!err){
+                console.log("Videogame: " + foundGame);
+                res.render(__dirname + '/views/editGameInfo.ejs', {videogame: foundGame, successMessage: "", userLogged: currentUser, authenticated: true, landPage: "Edit Game"})
+            }
+        });
+    }else{
+        res.redirect('/');
+    }
 });
 
 /* Handling POST request */ 
@@ -247,13 +283,13 @@ app.post('/register', (req, res)=>{
 app.post('/login', (req, res)=>{
     User.findOne({username : req.body.username}, (err, user) =>{
         if(err || (user === null)){
-            res.render(__dirname+"/views/login.ejs", {landPage: "Login", errorMessage: process.env.WRONG_CREDENTIALS});  
+            res.render(__dirname+"/views/login.ejs", {authenticated:false,landPage: "Login", errorMessage: process.env.WRONG_CREDENTIALS});  
         }else{
             req.login(user, (error)=>{
                 if(error){
                     console.log(user);
                     console.log(error);
-                    res.render(__dirname+"/views/login.ejs", {landPage: "Login", errorMessage: error});  
+                    res.render(__dirname+"/views/login.ejs", {authenticated:false,landPage: "Login", errorMessage: error});  
                 }else{
                     passport.authenticate('local')(req, res, ()=>{
                         currentUser = req.user;
@@ -273,7 +309,7 @@ app.post('/uploadVideogame',upload.single('gameImage'), (req, res) =>{
     var gameScore = Number(req.body.gameScore);
     var gameRate = req.body.gameRating;
     var gameGenre = req.body.gameGenre;
-
+    var gameDeveloper = req.body.developer;
     /* Adds the console availability */
     if(req.body.ps4 != undefined)
         consoleAvailability.push(Number(req.body.ps4));
@@ -299,7 +335,8 @@ app.post('/uploadVideogame',upload.single('gameImage'), (req, res) =>{
                 genre: gameGenre,
                 rate: gameRate,
                 console: consoleAvailability,
-                store: store
+                store: store,
+                developer: gameDeveloper
             });
             /* Saving the videogame in the DB */
             videogame.save();
@@ -325,8 +362,12 @@ app.post('/gameInfo', (req, res) => {
     console.log('#########################################');
     Videogame.where({_id : req.body.gameId}).findOne((err, selectedGame) =>{
         if(!err){
-            console.log(selectedGame);
-            res.render(__dirname+"/views/gameInfo.ejs", {landPage: "GameSpot", selectedGame: selectedGame, userLogged: currentUser, authenticated: true});
+            console.log(selectedGame.store);
+            if(currentUser != null){
+                res.render(__dirname+"/views/gameInfo.ejs", {landPage: "GameSpot", selectedGame: selectedGame, userLogged: currentUser, authenticated: true});
+            }else{
+                res.render(__dirname+"/views/gameInfo.ejs", {landPage: "GameSpot", selectedGame: selectedGame, userLogged: currentUser, authenticated: false});
+            }
         }
     });
 });
@@ -359,13 +400,67 @@ app.post('/updateUserInfo', (req, res) =>{
         if(err || passwordErr){
             console.log("err:" + err);
             console.log("passwordErr:" + passwordErr);
-            res.redirect("/updateUserInfo");
+            res.render(__dirname + "/views/updateUserInfo.ejs",{message: "Check your password and try again.", userLogged: currentUser, authenticated: true, landPage: "Update info"});
         }else{
             res.render(__dirname + "/views/success.ejs", {userLogged: currentUser,landPage: "GameSpot", successMessage: "Password update succesfully ", authenticated:true, });
         }
     });
 });
 
+app.post('/gameList', (req, res) =>{
+    var gameId = req.body.gamePick;
+    Videogame.findOne({_id: gameId}, (err, selectedGame)=>{
+        if(err){
+            console.log("Error => " + err);
+        }else{
+            const query = { username: {$eq: currentUser.username} };
+            const updateDocument = { $push: { "gameList": selectedGame } };
+            User.updateOne(query, updateDocument, (err, result)=>{
+                if(err){
+                    console.log(err);
+                }else{
+                    res.redirect('/gameList');
+                }
+            });
+        }
+    });
+});
+
+app.post('/editGameInfo', (req, res)=>{
+    var gameId = req.body.gameId;
+
+    const store = new Store({
+        storeName: req.body.gameStore,
+        storeUrl: req.body.gameStoreUrl 
+    });
+    var game_title = req.body.gameTitle;
+    var game_description =  req.body.gameDescription;
+    var game_score = req.body.gameScore;
+    var game_restriction = req.body.gameRating; 
+    var game_genre = req.body.gameGenre;
+
+    const query = { _id: {$eq: gameId}} ;
+    const updateDocument = {
+        $push: {"store": store},
+        $set: {"title": game_title},
+        $set: {"description": game_description},
+        $set: {"score": game_score},
+        $set: {"genre": game_genre},
+        $set: {"rate": game_restriction},
+    };
+    Videogame.updateOne(query, updateDocument, (err, result)=>{
+        if(!err){
+            res.redirect('/');
+        }else{
+            console.log(err);
+            res.redirect('/');
+        }
+    });
+    
+    
+
+    
+});
 //App listen on port 3000
 app.listen(3000, ()=>{
     console.log("Server started on port 3000");

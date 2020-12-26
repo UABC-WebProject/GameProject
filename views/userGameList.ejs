@@ -1,0 +1,27 @@
+<%- include('header') %>
+<h1 class="big-header">My Game List</h1>
+<section class="user-game-list">
+    <div class="row ">
+        <div class="col-lg-6 col-md-6 col-sm-6 user-col-list"  >
+            <% for( let index = 0; index < userLogged.gameList.length; index++ ) { %>
+                <div class="card mb-3" style="display:inline-block; text-align:center;" >
+                    <div class="row g-0" >
+                      <div class="col-md-4" >
+                        <img class="user-game-info" src= <%= userLogged.gameList[index].path%> alt="...">
+                      </div>
+                      <div class="col-md-8">
+                        <div class="card-body">
+                          <h5 class="card-title"><%= userLogged.gameList[index].title%></h5>
+                          <p class="card-text"><%= userLogged.gameList[index].description%></p>
+                          <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+            <% } %>
+        </div>
+    </div>
+</section>
+
+    
+<%- include('footer') %> 

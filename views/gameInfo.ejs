@@ -5,9 +5,44 @@
         <div class="col-lg-6 col-md-6 col-sm-6">
             <img class="game-info-img" src=<%= selectedGame.path %>  alt=":)">
         </div>
-        <div class="col-lg-6 col-md-6 col-sm-6">
-            <h4> <%= selectedGame.title %>  </h4>
-            <h4> <%= selectedGame.description %> </h4>
+        <div class="col-lg-6 col-md-6 col-sm-6 game-description">
+            
+            <p id="game-title"> <%= selectedGame.title %>  </p>
+            
+            <label class="game-subtitle" for="game-description">About this game</label>
+            <p class="game-attributes" id="game-description"> <%= selectedGame.description %> </p>
+            
+            <label class="game-subtitle" for="game-rating">Rate</label>
+            <p class="game-attributes" id="game-rating"> <%= selectedGame.rate %> </p>
+            
+            <label class="game-subtitle" for="game-score">Score</label>
+            <p class="game-attributes" id="game-score"><%= selectedGame.score %></p>
+            
+            <label class="game-subtitle" for="game-where-to-buy">Available in</label>
+            <% for( let index = 0; index < selectedGame.store.length; index++ ) { %>
+                <a href=<%= selectedGame.store[index].storeUrl %>  class="game-attributes" id="game-where-to-buy"> 
+                    <p class="game-attributes">
+                        <%= selectedGame.store[index].storeName %> 
+                    </p>
+                </a>
+            <% } %>
+            <label class="game-subtitle" for="game-genre">Genre</label>
+            <p class="game-attributes" id="game-genre"> <%= selectedGame.genre %> </p>
+            <div style="display: inline;">
+
+                    <% if (userLogged != null) { %>
+                        <form style="display:inline;" action="/gameList" method="POST">
+                            <button name="gamePick" value= <%= selectedGame._id %>  class="btn btn-info"> Add to my list </button>
+                        </form>
+
+
+                    <% if (userLogged.admin === true) { %>
+                        <form style="display:inline; padding:0.3rem;" action="/editGameInfo" method="GET">
+                            <button name="videoGameId" value= <%= selectedGame._id %>  class="btn btn-info"> Edit info </button>
+                        </form>
+                        <% } %>
+                        <% } %>
+            </div>
         </div>
     </div>
 </div>
