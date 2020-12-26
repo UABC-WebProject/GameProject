@@ -309,3 +309,52 @@ p{
 .submit-button{
     margin-top: 0.3rem;
 }
+
+/* game information */
+#game-title{
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 900;
+    color: #000;
+    text-align: left;
+    font-size: 2rem;
+}
+.game-subtitle{
+    text-align: left;
+    font-weight: 900;
+    font-family:'Montserrat', sans-serif ;
+    color: #000;
+    font-size: 1.2rem;
+}
+.game-attributes{
+    font-family: 'Montserrat', sans-serif;
+    color: #000;
+    text-align: left;
+    font-size: 1.2rem;
+}
+
+.game-description{
+    text-align: left;
+}
+
+.user-game-list{
+    padding: 0 auto;
+    text-align: left;
+}
+
+.user-game-info{
+    width:100%; 
+    padding-left:5px; 
+    padding-top:20px;
+}
+
+.user-col-list{
+    margin: 0 auto;
+}
+
+.game-edit-info{
+    text-align: left;
+    padding: 1rem 10rem;
+}
+.form-input-info{
+    width: 45%;
+}
