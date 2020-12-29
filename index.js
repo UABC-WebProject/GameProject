@@ -11,6 +11,8 @@ const session = require('express-session');
 const passport = require("passport");
 const passportLocalMongoose = require('passport-local-mongoose');
 const { query } = require('express');
+var ObjectId = require('mongodb').ObjectId; 
+const { use } = require('passport');
 //const passportLocal = require('passport-local');
 var currentUser = null;
 /*If register fails messages*/
@@ -77,7 +79,6 @@ const consoleSchema = mongoose.Schema({
 const Console = mongoose.model("Console", consoleSchema);
 
 const videogameSchema = new mongoose.Schema({
-    _id: Number,
     title: String,
     description: String,
     path: String,
@@ -194,11 +195,19 @@ app.get("/uploadVideogame", (req, res)=>{
 });
 
 app.get("/gameInfo", (req, res) =>{
-    if(req.isAuthenticated()){
-        res.render(__dirname+"/views/gameInfo.ejs", {landPage: "GameSpot",authenticated: true, userLogged: currentUser});
-    }else{
-        res.render(__dirname+"/views/gameInfo.ejs", {landPage: "GameSpot", authenticated: false, userLogged: null});
-    }
+    var gameId= req.query.gameId;
+    console.log(gameId);
+    console.log('#########################################');
+    Videogame.where({_id : gameId}).findOne((err, selectedGame) =>{
+        if(!err){
+            console.log(selectedGame.store);
+            if(currentUser != null){
+                res.render(__dirname+"/views/gameInfo.ejs", {landPage: "GameSpot", selectedGame: selectedGame, userLogged: currentUser, authenticated: true});
+            }else{
+                res.render(__dirname+"/views/gameInfo.ejs", {landPage: "GameSpot", selectedGame: selectedGame, userLogged: currentUser, authenticated: false});
+            }
+        }
+    });
 });
 
 app.get('/settings', (req, res)=>{
@@ -239,7 +248,6 @@ app.get('/gameList', (req, res)=>{
         //console.log("Number of list: " + currentUser.gameList.length);
         User.findOne({username: currentUser.username}, (err, updateUser) =>{
             if(!err){
-                console.log("current user (lenght size): " + currentUser.gameList.length);
                 res.render(__dirname + "/views/userGameList.ejs",{successMessage: "", userLogged: updateUser, authenticated: true, landPage: "My game list"});
             }
         });
@@ -286,10 +294,11 @@ app.post('/login', (req, res)=>{
             res.render(__dirname+"/views/login.ejs", {authenticated:false,landPage: "Login", errorMessage: process.env.WRONG_CREDENTIALS});  
         }else{
             req.login(user, (error)=>{
+                console.log("********USER********");
+                console.log(user);
                 if(error){
-                    console.log(user);
                     console.log(error);
-                    res.render(__dirname+"/views/login.ejs", {authenticated:false,landPage: "Login", errorMessage: error});  
+                    res.redirect('/login');
                 }else{
                     passport.authenticate('local')(req, res, ()=>{
                         currentUser = req.user;
@@ -327,7 +336,6 @@ app.post('/uploadVideogame',upload.single('gameImage'), (req, res) =>{
     Videogame.find( (err, gameList) => {
         if(!err){
             const videogame = new Videogame({
-                _id: gameList.length + 1,
                 title: req.body.gameTitle,
                 description:req.body.gameDescription,
                 path: imageRoute,
@@ -358,18 +366,7 @@ app.post('/uploadVideogame',upload.single('gameImage'), (req, res) =>{
 });
 
 app.post('/gameInfo', (req, res) => {
-    console.log(req.body.gameId);
-    console.log('#########################################');
-    Videogame.where({_id : req.body.gameId}).findOne((err, selectedGame) =>{
-        if(!err){
-            console.log(selectedGame.store);
-            if(currentUser != null){
-                res.render(__dirname+"/views/gameInfo.ejs", {landPage: "GameSpot", selectedGame: selectedGame, userLogged: currentUser, authenticated: true});
-            }else{
-                res.render(__dirname+"/views/gameInfo.ejs", {landPage: "GameSpot", selectedGame: selectedGame, userLogged: currentUser, authenticated: false});
-            }
-        }
-    });
+    
 });
 
 app.post("/deleteAccount", (req, res) =>{
@@ -428,7 +425,6 @@ app.post('/gameList', (req, res) =>{
 
 app.post('/editGameInfo', (req, res)=>{
     var gameId = req.body.gameId;
-
     const store = new Store({
         storeName: req.body.gameStore,
         storeUrl: req.body.gameStoreUrl 
@@ -439,7 +435,7 @@ app.post('/editGameInfo', (req, res)=>{
     var game_restriction = req.body.gameRating; 
     var game_genre = req.body.gameGenre;
 
-    const query = { _id: {$eq: gameId}} ;
+    const query = { _id: {$eq: gameId }} ;
     const updateDocument = {
         $push: {"store": store},
         $set: {"title": game_title},
@@ -450,17 +446,56 @@ app.post('/editGameInfo', (req, res)=>{
     };
     Videogame.updateOne(query, updateDocument, (err, result)=>{
         if(!err){
+            console.log("---------Videogame--------");
+            console.log(result);
             res.redirect('/');
         }else{
             console.log(err);
             res.redirect('/');
         }
     });
-    
-    
-
-    
 });
+
+app.post('/deleteGame', (req, res)=>{
+    var gameId = ObjectId(req.body.deleteGameId);
+    console.log("Delete game" + gameId);
+    var query = {_id:{$eq: gameId}};
+    Videogame.deleteOne(query, (err)=>{
+        if(err){
+            console.log(err);
+        }else{
+            
+            res.render(__dirname + "/views/success.ejs", {userLogged:currentUser,landPage: "GameSpot", successMessage:"Videogame was deleted successfully.", authenticated: true});
+        }
+    });
+});
+
+app.post('/deleteGameOfMyList', (req, res)=>{
+    console.log("Game ID:" + req.body.gameId);
+    const query = {
+        "username" : currentUser.username
+    };
+    const updateDocument = {
+        $pull: {
+            gameList:{_id : ObjectId(req.body.gameId)}
+        } 
+    };
+    console.log(query);
+    
+    console.log(updateDocument);
+    /* Videogame.findOne({_id: req.body.gameId}, (err, result)=>{
+        console.log(result);
+    }) */
+    User.updateOne(query, updateDocument, {multi:true}, (err, result) => {
+        if(err){
+            console.log("Error:" + err);
+        }else{
+            console.log(result);
+            res.redirect('/gameList');
+        }
+    });
+});
+
 //App listen on port 3000
 app.listen(3000, ()=>{
     console.log("Server started on port 3000");

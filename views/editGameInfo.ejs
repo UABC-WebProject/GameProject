@@ -6,7 +6,8 @@
     <div class="col-lg-12">
         <form method="POST" action="/editGameInfo" class="form-floating">
             <label for="videogame-score">ID #</label>
-            <input name="gameId" type="text" class="form-input-info form-control" id="videogame-id" placeholder="" value=<%= videogame._id %>>
+            <input  type="text" class="form-input-info form-control" id="videogame-id" placeholder="" value=<%= videogame._id %> disabled>
+            <input name="gameId" type="text" class="form-input-info form-control" id="videogame-id" placeholder="" value=<%= videogame._id %> hidden>
 
             <label for="videogame-title">Game title</label>
             <textarea  name="gameTitle" class="form-input-info form-control" id="videogame-title" style="height: 70px; text-align: left;">
@@ -46,11 +47,13 @@
                 <option value="Best Buy">Best Buy</option>
                 <option value="Game Stop">Game Stop</option>
                 <option value="Walmart">Walmart</option>
-              </select>
+            </select>
 
-              <input name="gameStoreUrl" placeholder="Game Url..." type="text" class="form-input-info form-control" id="">
-              <button class="btn btn-success" type="submit" value="Submit">Update</button>
-              <a href="/" class="btn btn-danger"  value="Submit">Cancel</a>
+            <input name="gameStoreUrl" placeholder="Game Url..." type="text" class="form-input-info form-control" id="">
+            <button style="margin:1rem 0;" class="btn btn-success" type="submit" value="Submit"><i class="fas fa-check-circle"></i> Update</button>
+            <a class="btn btn-danger"  href="/">
+                <i class="fas fa-times-circle"></i>Cancel
+            </a>
 
         </form>
     </div>
