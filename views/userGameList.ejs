@@ -1,26 +1,35 @@
 <%- include('header') %>
-<h1 class="big-header">My Game List</h1>
+<% if (userLogged.gameList.length) { %>
+<h1 style="padding:3rem" class="big-header">My Game List</h1>
 <section class="user-game-list">
     <div class="row ">
-        <div class="col-lg-6 col-md-6 col-sm-6 user-col-list"  >
-            <% for( let index = 0; index < userLogged.gameList.length; index++ ) { %>
-                <div class="card mb-3" style="display:inline-block; text-align:center;" >
-                    <div class="row g-0" >
-                      <div class="col-md-4" >
-                        <img class="user-game-info" src= <%= userLogged.gameList[index].path%> alt="...">
-                      </div>
-                      <div class="col-md-8">
-                        <div class="card-body">
-                          <h5 class="card-title"><%= userLogged.gameList[index].title%></h5>
-                          <p class="card-text"><%= userLogged.gameList[index].description%></p>
-                          <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
-                        </div>
+      <div class="col-lg-6 col-md-6 col-sm-6 user-col-list"  >
+          <% for( let index = 0; index < userLogged.gameList.length; index++ ) { %>
+              <div class="card mb-3" style="display:inline-block; text-align:center;" >
+                  <div class="row g-0" >
+                    <div class="col-md-4" >
+                      <img class="user-game-info" src= <%= userLogged.gameList[index].path%> alt="...">
+                    </div>
+                    <div class="col-md-8">
+                      <div style="text-align: left;" class="card-body">
+                        <h5 class="card-title"><%= userLogged.gameList[index].title%></h5>
+                        <p style="font-size:0.9rem;" class="card-text"><%= userLogged.gameList[index].description%></p>
+                        <form action="/deleteGameOfMyList" method="post">
+                          <button class="btn btn-danger" type="submit" name="gameId" value=<%= userLogged.gameList[index]._id %> > <i class="fas fa-times-circle"></i> Remove </button>
+                        </form>
                       </div>
                     </div>
                   </div>
-            <% } %>
-        </div>
-    </div>
+                </div>
+          <% } %>
+      </div>
+  </div>
+  <% } else{%>
+   
+    <h1 class="big-header" style="padding:12rem;"> Your list is empty  <i style="text-align: center;" class="fas fa-sad-tear"></i></h1>
+  <% } %>
+     
+    
 </section>
 
     
